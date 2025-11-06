@@ -1,33 +1,35 @@
-// Flat config for ESLint (ESM)
-import js from '@eslint/js';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
+// @ts-check
+import eslint from '@eslint/js';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'eslint.config.cjs']
+    ignores: ['eslint.config.mjs'],
   },
-  js.configs.recommended,
+  eslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
+  eslintPluginPrettierRecommended,
   {
-    files: ['**/*.ts'],
     languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'commonjs',
-      parser: tsParser,
       globals: {
-        console: 'readonly',
-        process: 'readonly'
-      }
+        ...globals.node,
+        ...globals.jest,
+      },
+      sourceType: 'commonjs',
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
-    plugins: {
-      '@typescript-eslint': tsPlugin
-    },
+  },
+  {
     rules: {
-      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }]
-    }
-  }
-];
-
-
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      "prettier/prettier": ["error", { endOfLine: "auto" }],
+    },
+  },
+);
