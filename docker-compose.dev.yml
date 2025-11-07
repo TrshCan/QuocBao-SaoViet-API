@@ -25,6 +25,7 @@ services:
     image: redis:8-alpine
     container_name: saoviet-redis-dev
     restart: unless-stopped
+    # command: ["redis-server", "--requirepass", "redis123"]
     ports:
       - "6379:6379"
     volumes:
