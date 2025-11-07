@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import * as ioredisProvider from './ioredis.provider';
+
+import { REDIS_CLIENT } from './ioredis.constants';
+import type { RedisClient } from './ioredis.provider';
 
 @Injectable()
 export class IoredisService {
   constructor(
-    @Inject(ioredisProvider.REDIS_CLIENT)
-    private readonly client: ioredisProvider.RedisClient,
+    @Inject(REDIS_CLIENT)
+    private readonly client: RedisClient,
   ) {}
 
   async set(key: string, value: string, expirationSeconds: number) {

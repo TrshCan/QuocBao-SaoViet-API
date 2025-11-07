@@ -3,7 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 
 import { IoredisService } from './ioredis.service';
-import { ioredisProvider, REDIS_CLIENT } from './ioredis.provider';
+import { ioredisProvider } from './ioredis.provider';
+import { REDIS_CLIENT } from './ioredis.constants';
 import { IoredisHealthIndicator } from './ioredis.health';
 
 @Global()

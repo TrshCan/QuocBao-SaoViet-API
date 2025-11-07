@@ -4,40 +4,49 @@ import { ConfigService } from '@nestjs/config';
 import Redis, { type RedisOptions } from 'ioredis';
 
 import { EnvConfig } from '@/configs';
+import { REDIS_CLIENT } from './ioredis.constants';
+import { redisRetryStrategy } from './strategies/ioredis.strategy';
 
 export type RedisClient = Redis;
-export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
+
+export const redisOptions = ({
+  host,
+  port,
+  password,
+  node_env,
+}: Pick<RedisOptions, 'host' | 'port' | 'password'> & {
+  node_env: EnvConfig['NODE_ENV'];
+}): RedisOptions => {
+  let totalRetryDuration = 0;
+
+  return {
+    host,
+    port,
+    password,
+    showFriendlyErrorStack: node_env === 'production' ? false : true,
+    lazyConnect: true,
+    commandTimeout: 1000,
+    retryStrategy: (times) => {
+      const { delay, retryDuration } = redisRetryStrategy(
+        times,
+        totalRetryDuration,
+      );
+      totalRetryDuration = retryDuration;
+      return delay;
+    },
+  };
+};
 
 export const ioredisProvider: Provider = {
   useFactory: (configService: ConfigService<EnvConfig>): RedisClient => {
-    const url = configService.get<string>('REDIS_URL');
-    if (!url) {
-      throw new Error('REDIS_URL is not set');
-    }
-    if (!url.startsWith('redis://')) {
-      throw new Error('REDIS_URL must start with redis://');
-    }
-    if (!url.includes('@')) {
-      throw new Error('REDIS_URL must contain @');
-    }
+    const host = configService.get<string>('REDIS_HOST');
+    const port = configService.get<number>('REDIS_PORT');
+    const password = configService.get<string>('REDIS_PASSWORD');
+    const node_env =
+      configService.get<EnvConfig['NODE_ENV']>('NODE_ENV') || 'development';
 
-    const redisOptions: RedisOptions = {
-      retryStrategy: (times: number) => {
-        if (times > 3) {
-          console.error('[ioredis] Max retries reached');
-          return null;
-        }
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-      maxRetriesPerRequest: 3,
-      enableReadyCheck: true,
-      lazyConnect: false,
-      connectTimeout: 10000,
-      keepAlive: 30000,
-    };
-
-    const redis = new Redis(url, redisOptions);
+    const options = redisOptions({ host, port, password, node_env });
+    const redis = new Redis(options);
 
     // Handle connection errors - stop retrying on auth errors
     redis.on('error', (error) => {
