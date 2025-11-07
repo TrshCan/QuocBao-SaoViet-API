@@ -1,0 +1,96 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:18-alpine
+    container_name: saoviet-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saoviet_db
+      POSTGRES_USER: saoviet_user
+      POSTGRES_PASSWORD: saoviet_password
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --lc-collate=C --lc-ctype=C'
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - saoviet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saoviet_user -d saoviet_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis for caching and sessions (future use)
+  redis:
+    image: redis:7-alpine
+    container_name: saoviet-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - saoviet-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Application (production build)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: saoviet-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://saoviet_user:saoviet_password@postgres:5432/saoviet_db
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this-in-production}
+      BCRYPT_ROUNDS: 12
+      # Rate limiting - Set to very high values (effectively disabled)
+      RATE_LIMIT_WINDOW_MS: 3600000
+      RATE_LIMIT_MAX_REQUESTS: 999999
+      LOG_LEVEL: info
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:3001}
+      TZ: Asia/Ho_Chi_Minh
+      # File Upload Configuration
+      UPLOAD_DIR: /app/uploads
+      MAX_FILE_SIZE: 52428800
+      ALLOWED_IMAGE_TYPES: image/jpeg,image/png,image/webp
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - saoviet-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  saoviet-network:
+    driver: bridge
