@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 
 import { envConfig } from './configs/config-env';
 import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
-import { HealthModule } from './modules/health/health.module';
+import { HealthModule } from './modules/shared/health/health.module';
 import { IoredisModule } from './modules/shared/ioredis/ioredis.module';
 
 import { envConfigSchema } from './common/validations/env-config';
