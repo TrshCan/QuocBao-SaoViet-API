@@ -57,5 +57,6 @@ $ yarn run test:cov
 ## Resources
 
 - [Development Guide](documents/development_guide.md)
-
+- [Lifecycle events in NestJS](https://docs.nestjs.com/fundamentals/lifecycle-events)
 - [Query with Prisma](https://docs.nestjs.com/recipes/prisma#create-two-database-tables-with-prisma-migrate)
+- [Health check with Terminus](https://docs.nestjs.com/recipes/terminus#healthchecks-terminus)
