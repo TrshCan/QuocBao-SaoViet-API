@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '@/modules/shared/prisma';
+import { Prisma } from 'generated/prisma';
+import { DefaultArgs } from 'generated/prisma/runtime/library';
 
 @Injectable()
 export class KeyTokenRepository {
@@ -10,7 +12,22 @@ export class KeyTokenRepository {
 
   findOneById() {}
 
-  findOneByUserId() {}
+  async findOneByUserId<
+    T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined,
+    I extends Prisma.KeyTokenInclude<DefaultArgs> | undefined,
+  >(
+    userId: string,
+    options?: {
+      select?: T;
+      include?: I;
+    },
+  ): Promise<Prisma.KeyTokenGetPayload<{ select: T; include: I }> | null> {
+    const buildQuery = (await this.prisma.keyToken.findUnique({
+      where: { userId },
+      ...options,
+    })) as Prisma.KeyTokenGetPayload<{ select: T; include: I }> | null;
+    return buildQuery;
+  }
 
   async deleteOneById(keyTokenId: string) {
     // Type assertion needed: PrismaService extends PrismaClient but TypeScript strict mode

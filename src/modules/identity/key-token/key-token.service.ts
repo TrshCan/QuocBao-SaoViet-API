@@ -1,6 +1,8 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +10,11 @@ import { ConfigService } from '@nestjs/config';
 import JWT from 'jsonwebtoken';
 
 import { EnvConfig } from '@/configs/config-env';
+import { KEY_CACHE } from '@/common/constants';
+import { toErrorMessage } from '@/utils';
+import { IoredisService } from '@/modules/shared/ioredis';
+import { KeyStoreForJWT } from '@/types/jwt';
+import { KeyTokenRepository } from './key-token.repository';
 
 export interface TempTokenPayload {
   userId: string;
@@ -17,7 +24,13 @@ export interface TempTokenPayload {
 
 @Injectable()
 export class KeyTokenService {
-  constructor(private readonly configService: ConfigService<EnvConfig>) {}
+  private readonly logger = new Logger(KeyTokenService.name);
+
+  constructor(
+    private readonly configService: ConfigService<EnvConfig>,
+    private readonly redisService: IoredisService,
+    private readonly keyTokenRepository: KeyTokenRepository,
+  ) {}
 
   async createKeyToken() {}
 
@@ -25,7 +38,34 @@ export class KeyTokenService {
 
   verifyJWT() {}
 
-  async requireKeyStore() {}
+  async requireKeyStore(userId: string) {
+    const cacheKey = `${KEY_CACHE.KEY_STORE}:${userId}`;
+    try {
+      // Try to get from Redis cache first
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        const keyStore = JSON.parse(cachedData) as KeyStoreForJWT;
+        return keyStore;
+      }
+
+      // Cache miss - get from database
+      const keyStore = await this.findByUserId(userId);
+      if (!keyStore) {
+        throw new NotFoundException('Key store not found');
+      }
+
+      // Store in Redis cache with 1 hour TTL
+      await this.redisService.set(cacheKey, JSON.stringify(keyStore), 60 * 60);
+
+      return keyStore;
+    } catch (error) {
+      const message = toErrorMessage(error);
+      this.logger.error('Redis cache error, falling back to database', {
+        error: message,
+      });
+      throw new InternalServerErrorException('Failed to get key store');
+    }
+  }
 
   // async removeKeyById(keyTokenId: string) {
   //   try {
@@ -38,7 +78,17 @@ export class KeyTokenService {
   // }
 
   async findOneById() {}
-  async findByUserId() {}
+  async findByUserId(userId: string) {
+    return await this.keyTokenRepository.findOneByUserId(userId, {
+      select: {
+        id: true,
+        privateKey: true,
+        publicKey: true,
+        refreshToken: true,
+        refreshTokenUsed: true,
+      },
+    });
+  }
   async findByRefreshTokenUsed() {}
   async findByRefreshToken() {}
   async deleteKeyByUserId() {}
