@@ -47,10 +47,10 @@ export const doubleCsrfOptions: DoubleCsrfConfigOptions = {
 
   // Cookie options
   cookieOptions: {
-    sameSite: 'strict', // Prevents CSRF attacks
+    sameSite: 'strict',
     path: '/',
-    secure: envConfig.NODE_ENV === 'production', // HTTPS only in production
-    httpOnly: true, // Prevents JavaScript access (security best practice)
+    secure: envConfig.NODE_ENV === 'production',
+    httpOnly: true, // Prevents JavaScript access
   },
 
   // HTTP methods that don't require CSRF protection
