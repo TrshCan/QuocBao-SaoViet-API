@@ -2,6 +2,7 @@ import type { Request } from 'express';
 import type { DoubleCsrfConfigOptions } from 'csrf-csrf';
 import { envConfig } from './config-env';
 import { HttpStatus } from '@nestjs/common';
+import { CSRF_TOKEN } from '@/common/constants';
 
 /**
  * CSRF Configuration for csrf-csrf library
@@ -59,7 +60,7 @@ export const doubleCsrfOptions: DoubleCsrfConfigOptions = {
   // Function to retrieve CSRF token from request
   // Default: looks for 'x-csrf-token' header
   getCsrfTokenFromRequest: (req: Request) => {
-    return req.headers['x-csrf-token'];
+    return req.headers[CSRF_TOKEN];
   },
 
   // Error configuration
