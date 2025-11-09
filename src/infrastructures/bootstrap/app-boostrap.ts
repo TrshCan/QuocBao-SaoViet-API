@@ -19,6 +19,7 @@ import { GlobalExceptionFilter } from '../../common/filters';
 
 import { AppModule } from '../../app.module';
 import { PrismaService } from '@/modules/shared/prisma/prisma.service';
+import { ResponseTransformInterceptor } from '@/common/interceptors';
 
 export class AppBootstrap {
   public app: NestExpressApplication;
@@ -32,9 +33,10 @@ export class AppBootstrap {
     this.configCors();
     this.initializeMiddlewares();
     this.initializeUploads();
-    this.setGlobalPrefix();
     this.initializeGlobalFilters();
+    this.initializeGlobalInterceptors();
     this.initializePrisma();
+    this.setGlobalPrefix();
     await this.handleUploadDirectories();
   }
 
@@ -58,6 +60,10 @@ export class AppBootstrap {
     this.app.useGlobalFilters(
       new GlobalExceptionFilter(this.app.get(ConfigService)),
     );
+  }
+
+  private initializeGlobalInterceptors() {
+    this.app.useGlobalInterceptors(new ResponseTransformInterceptor());
   }
 
   private initializeUploads() {
@@ -107,7 +113,7 @@ export class AppBootstrap {
     // Starts listening for shutdown hooks
     this.app.enableShutdownHooks();
     await this.app.listen(envConfig.PORT);
-    console.log(`Server is running on port ${envConfig.PORT}`);
-    console.log(`http://localhost:${envConfig.PORT}`);
+    console.log(`[development] - Server is running on port ${envConfig.PORT}`);
+    console.log(`[development] - http://localhost:${envConfig.PORT}`);
   }
 }
