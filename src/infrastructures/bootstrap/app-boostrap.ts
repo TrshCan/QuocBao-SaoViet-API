@@ -14,12 +14,12 @@ import {
   corsOptions,
   envConfig,
   helmetConfig,
-} from '../../configs';
-import { GlobalExceptionFilter } from '../../common/filters';
-
-import { AppModule } from '../../app.module';
-import { PrismaService } from '@/modules/shared/prisma/prisma.service';
+} from '@/configs';
+import { GlobalExceptionFilter } from '@/common/filters';
 import { ResponseTransformInterceptor } from '@/common/interceptors';
+
+import { PrismaService } from '@/modules/shared/prisma';
+import { AppModule } from '@/app';
 
 export class AppBootstrap {
   public app: NestExpressApplication;
