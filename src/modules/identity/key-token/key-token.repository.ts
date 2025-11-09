@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { PrismaService } from '@/modules/shared/prisma/prisma.service';
+import { PrismaService } from '@/modules/shared/prisma';
 
 @Injectable()
 export class KeyTokenRepository {
@@ -12,7 +12,11 @@ export class KeyTokenRepository {
 
   findOneByUserId() {}
 
-  deleteOneById() {}
+  async deleteOneById(keyTokenId: string) {
+    // Type assertion needed: PrismaService extends PrismaClient but TypeScript strict mode
+    // has issues inferring nested model types in some cases
+    return await this.prisma.keyToken.delete({ where: { id: keyTokenId } });
+  }
   deleteOneByUserId() {}
 
   deleteKeyStoreCachedByUserId() {}
