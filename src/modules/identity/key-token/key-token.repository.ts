@@ -29,10 +29,13 @@ export class KeyTokenRepository {
     return buildQuery;
   }
 
-  async deleteOneById(keyTokenId: string) {
-    // Type assertion needed: PrismaService extends PrismaClient but TypeScript strict mode
-    // has issues inferring nested model types in some cases
-    return await this.prisma.keyToken.delete({ where: { id: keyTokenId } });
+  async deleteOneById(keyTokenId: string): Promise<boolean> {
+    const isDeleted = await this.prisma.keyToken
+      .delete({
+        where: { id: keyTokenId },
+      })
+      .catch(() => null);
+    return !!isDeleted;
   }
   deleteOneByUserId() {}
 

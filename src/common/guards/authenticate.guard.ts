@@ -33,11 +33,11 @@ export class JwtAuthenticateGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
-    const userId = requireHeader(request, CLIENT_ID.toString());
-    const authHeader = requireHeader(request, AUTHORIZATION.toString());
-    const accessToken = handleBearerToken(authHeader);
 
     try {
+      const userId = requireHeader(request, CLIENT_ID.toString());
+      const authHeader = requireHeader(request, AUTHORIZATION.toString());
+      const accessToken = handleBearerToken(authHeader);
       // Check token in blacklist
       const blacklist = await this.redisService.existsOne(
         `${KEY_CACHE.BLACKLIST}:${accessToken}`,

@@ -15,6 +15,7 @@ import { toErrorMessage } from '@/utils';
 import { IoredisService } from '@/modules/shared/ioredis';
 import { KeyStoreForJWT, TempTokenPayload } from '@/types/jwt';
 import { KeyTokenRepository } from './key-token.repository';
+import { KeyToken } from 'generated/prisma';
 
 @Injectable()
 export class KeyTokenService {
@@ -70,15 +71,18 @@ export class KeyTokenService {
     }
   }
 
-  // async removeKeyById(keyTokenId: string) {
-  //   try {
-  //     const result = await KeyTokenModel.destroy({
-  //       where: { id }
-  //     });
-  //   } catch (error) {
-
-  //   }
-  // }
+  async removeKeyById(keyTokenId: string) {
+    try {
+      const result = await this.keyTokenRepository.deleteOneById(keyTokenId);
+      return result;
+    } catch (error) {
+      const message = toErrorMessage(error);
+      this.logger.error('Failed to remove key by id', {
+        error: message,
+      });
+      throw new InternalServerErrorException('Failed to remove key by id');
+    }
+  }
 
   async findOneById() {}
   async findByUserId(userId: string) {
@@ -95,6 +99,70 @@ export class KeyTokenService {
   async findByRefreshTokenUsed() {}
   async findByRefreshToken() {}
   async deleteKeyByUserId() {}
+
+  /**
+   * Invalidate key store cache for a specific user
+   */
+  async invalidateKeyStoreCache(userId: string): Promise<void> {
+    try {
+      const cacheKey = `${KEY_CACHE.KEY_STORE}:${userId}`;
+      await this.redisService.delete(cacheKey);
+      this.logger.log('Key store cache invalidated', { userId });
+    } catch (error) {
+      this.logger.warn('Failed to invalidate key store cache:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  /**
+   * Update key store cache after modifications
+   */
+  async updateKeyStoreCache(keyStore: KeyToken): Promise<void> {
+    try {
+      const cacheKey = `keyStore:${keyStore.userId}`;
+      await this.redisService.set(
+        cacheKey,
+        JSON.stringify(keyStore),
+        60 * 60 * 1,
+      ); // 1 hour
+    } catch (error) {
+      this.logger.warn('Failed to update key store cache:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  async deleteKeyStoreCache(userId: string): Promise<void> {
+    try {
+      const cacheKey = `keyStore:${userId}`;
+      await this.redisService.delete(cacheKey);
+    } catch (error) {
+      this.logger.warn('Failed to delete key store cache:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  async addTokenToBlacklist(token: string, ttl: number): Promise<void> {
+    try {
+      // const { exp } = JWT.decode(token) as AccessTokenPayload;
+      // const ttl = exp - Math.floor(Date.now() / 1000);
+      await this.redisService.set(
+        `${KEY_CACHE.BLACKLIST}:${token}`,
+        'true',
+        ttl,
+      );
+    } catch (error) {
+      this.logger.warn('Failed to add token to blacklist:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  decodeJWT<T>(token: string): T {
+    return JWT.decode(token) as T;
+  }
 
   createTempToken(payload: TempTokenPayload): {
     tempToken: string;

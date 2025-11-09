@@ -19,6 +19,7 @@ import { encrypt, getInfoData } from '@/utils';
 import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { EnvConfig } from '@/configs';
 import { Prisma } from 'generated/prisma';
+import { AccessTokenPayload } from '@/types/jwt';
 
 @Injectable()
 export class AuthService {
@@ -122,7 +123,7 @@ export class AuthService {
 
   async handleRefreshToken() {}
 
-  logout({
+  async logout({
     userId,
     keyStoreId,
     accessToken,
@@ -135,12 +136,23 @@ export class AuthService {
       throw new UnauthorizedException('Authentication required!');
     }
 
-    // const delKey = await this.keyTokenService.removeKeyById(keyStoreId);
-    // if (!delKey) {
-    //   throw new UnauthorizedException('Key not found!');
-    // }
+    const delKey = await this.keyTokenService.removeKeyById(keyStoreId);
 
-    // await this.keyTokenService.deleteKeyStoreCache(userId);
+    // Clear cache (if applicable)
+    await this.keyTokenService.deleteKeyStoreCache(userId);
+
+    const { exp } =
+      this.keyTokenService.decodeJWT<AccessTokenPayload>(accessToken);
+    if (!exp) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    const ttl = exp - Math.floor(Date.now() / 1000);
+    if (ttl <= 0) {
+      throw new UnauthorizedException('Token has expired');
+    }
+    await this.keyTokenService.addTokenToBlacklist(accessToken, ttl);
+
+    return delKey;
   }
 }
 

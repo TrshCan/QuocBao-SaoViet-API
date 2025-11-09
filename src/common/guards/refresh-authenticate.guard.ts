@@ -15,8 +15,8 @@ import { requireHeader, setRefreshUser, validateUserId } from '@/utils';
 import { RefreshTokenPayload } from '@/types/jwt';
 
 @Injectable()
-export class RefreshAuthenticateGuard implements CanActivate {
-  private readonly logger = new Logger(RefreshAuthenticateGuard.name);
+export class JwtRefreshAuthenticateGuard implements CanActivate {
+  private readonly logger = new Logger(JwtRefreshAuthenticateGuard.name);
 
   constructor(private readonly keyTokenService: KeyTokenService) {}
 
