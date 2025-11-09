@@ -3886,6 +3886,13 @@ cross-spawn@^7.0.3, cross-spawn@^7.0.6:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+csrf-csrf@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/csrf-csrf/-/csrf-csrf-4.0.3.tgz#78ef21148526deb7a88dcaa6c392e3ae00355247"
+  integrity sha512-DaygOzelL4Qo1pHwI9LPyZL+X2456/OzpT596kNeZGiTSqKVDOk/9PPJ+FjzZacjMUEusOHw3WJKe1RW4iUhrw==
+  dependencies:
+    http-errors "^2.0.0"
+
 css-select@^5.1.0:
   version "5.2.2"
   resolved "https://registry.yarnpkg.com/css-select/-/css-select-5.2.2.tgz#01b6e8d163637bb2dd6c982ca4ed65863682786e"
