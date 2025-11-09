@@ -27,7 +27,10 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout(@Req() request: Request, @Headers(AUTHORIZATION) accessToken: string) {
+  logout(
+    @Req() request: Request,
+    @Headers(AUTHORIZATION.toString()) accessToken: string,
+  ) {
     const { userId, keyStoreId } = request.refresh;
     if (!userId || !keyStoreId || !accessToken) {
       throw new UnauthorizedException('Authentication required!');

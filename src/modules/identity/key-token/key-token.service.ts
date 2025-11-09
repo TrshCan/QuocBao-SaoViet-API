@@ -13,14 +13,8 @@ import { EnvConfig } from '@/configs/config-env';
 import { KEY_CACHE } from '@/common/constants';
 import { toErrorMessage } from '@/utils';
 import { IoredisService } from '@/modules/shared/ioredis';
-import { KeyStoreForJWT } from '@/types/jwt';
+import { KeyStoreForJWT, TempTokenPayload } from '@/types/jwt';
 import { KeyTokenRepository } from './key-token.repository';
-
-export interface TempTokenPayload {
-  userId: string;
-  email: string;
-  type: 'login' | 'forgot-password';
-}
 
 @Injectable()
 export class KeyTokenService {
@@ -36,7 +30,16 @@ export class KeyTokenService {
 
   createTokenPair() {}
 
-  verifyJWT() {}
+  verifyJWT(token: string, keySecret: string): string | JWT.JwtPayload {
+    try {
+      return JWT.verify(token, keySecret, {
+        algorithms: ['RS256'],
+      });
+    } catch (error) {
+      this.logger.error('Error verify JWT:', error);
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 
   async requireKeyStore(userId: string) {
     const cacheKey = `${KEY_CACHE.KEY_STORE}:${userId}`;
