@@ -17,6 +17,7 @@ declare global {
       refreshToken?: string;
 
       tempTokenPayload?: TempTokenPayload;
+      userId?: string;
 
       resource?: any; // For resource ownership validation
       changeReason?: string; // For audit trail
