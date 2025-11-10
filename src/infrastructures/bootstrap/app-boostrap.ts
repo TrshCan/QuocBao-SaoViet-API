@@ -14,6 +14,7 @@ import {
   corsOptions,
   envConfig,
   helmetConfig,
+  uploadDir,
 } from '@/configs';
 import { GlobalExceptionFilter } from '@/common/filters';
 import { ResponseTransformInterceptor } from '@/common/interceptors';
@@ -41,7 +42,10 @@ export class AppBootstrap {
   }
 
   private configProxy() {
-    this.app.set('trust proxy', 1); // to Express knows that header X-Forwarded-* is from proxy
+    this.app.set(
+      'trust proxy',
+      envConfig.NODE_ENV === 'production' ? 'loopback' : true,
+    ); // to Express knows that header X-Forwarded-* is from proxy
   }
 
   private configCors() {
@@ -49,7 +53,20 @@ export class AppBootstrap {
   }
 
   private initializeMiddlewares() {
+    // TODO: cookie-parser MUST be registered before CSRF protection
+    // This allows csrf-csrf to read CSRF tokens from cookies
     this.app.use(cookieParser());
+
+    // const {
+    // doubleCsrfProtection, // Default CSRF protection middleware
+    // Available utilities (not used here, but can be used in routes):
+    // - generateCsrfToken: Generate CSRF tokens in routes
+    // - validateRequest: Custom validation middleware
+    // - invalidCsrfTokenError: Custom error handling
+    // } = doubleCsrf(doubleCsrfOptions);
+
+    // Apply CSRF protection to all routes (except GET, HEAD, OPTIONS)
+    // this.app.use(doubleCsrfProtection);
     this.app.use(helmet(helmetConfig));
     this.app.use(compression(compressionConfig));
     this.app.use(express.json({ limit: '20mb' }));
@@ -81,17 +98,6 @@ export class AppBootstrap {
   private async handleUploadDirectories() {
     await import('fs')
       .then((fs) => {
-        const uploadDir = [
-          'uploads',
-          'uploads/avatars',
-          'uploads/repair-cases',
-          'uploads/repair-cases/model_serial',
-          'uploads/repair-cases/repair_form',
-          'uploads/repair-cases/before_repair',
-          'uploads/repair-cases/after_repair',
-          'uploads/repair-cases/parts_components',
-          'uploads/repair-cases/warranty_invoice',
-        ];
         uploadDir.forEach((dir) => {
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
@@ -113,7 +119,9 @@ export class AppBootstrap {
     // Starts listening for shutdown hooks
     this.app.enableShutdownHooks();
     await this.app.listen(envConfig.PORT);
-    console.log(`[development] - Server is running on port ${envConfig.PORT}`);
-    console.log(`[development] - http://localhost:${envConfig.PORT}`);
+    console.log(
+      `[${envConfig.NODE_ENV}] - Server is running on port ${envConfig.PORT}`,
+    );
+    console.log(`[${envConfig.NODE_ENV}] - http://localhost:${envConfig.PORT}`);
   }
 }
