@@ -26,13 +26,5 @@
         "./src/*"
       ]
     }
-  },
-  "include": [
-    "src/**/*.ts", 
-    "src/**/*.d.ts", 
-    "src/**/*.js", 
-    "generated/**/*", 
-    "prisma"
-  ],
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "**/*.test.ts", "prisma/mocks"]
+  }
 }
