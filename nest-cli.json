@@ -12,6 +12,11 @@
       "include": "modules/mail/templates/**/*",
       "watchAssets": true,
       "outDir": "dist/modules/mail/templates"
-    }]
+    }],
+    "builder": {
+      "type": "swc",
+      "typeCheck": true,
+      "options": { "extensions": [".ts", ".js"] }
+    }
   }
 }
