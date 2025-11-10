@@ -25,12 +25,21 @@ export class JwtRefreshAuthenticateGuard implements CanActivate {
     try {
       const userId = requireHeader(request, CLIENT_ID.toString());
       const refreshToken = requireHeader(request, REFRESH_TOKEN.toString());
+
+      if (!refreshToken) {
+        throw new UnauthorizedException('Refresh token is required!');
+      }
+
+      if (!userId) {
+        throw new UnauthorizedException('User ID is required!');
+      }
+
       const keyStore = await this.keyTokenService.requireKeyStore(userId);
       const decodedUser = this.keyTokenService.verifyJWT(
         refreshToken,
         keyStore.privateKey,
       ) as RefreshTokenPayload;
-      validateUserId(userId, decodedUser.userId);
+      validateUserId(userId, decodedUser.id);
 
       setRefreshUser(request, keyStore, decodedUser, refreshToken);
       return true;

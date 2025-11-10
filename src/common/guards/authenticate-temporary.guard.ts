@@ -38,7 +38,7 @@ export class JwtAuthenticateTemporaryGuard implements CanActivate {
 
       // Attach temp token payload to request for use in controller
       request.tempTokenPayload = decoded;
-
+      request.userId = decoded.userId;
       return true;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
