@@ -26,6 +26,6 @@ import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
     PrismaModule,
   ],
   providers: [KeyTokenService, KeyTokenRepository],
-  exports: [KeyTokenService],
+  exports: [KeyTokenService, KeyTokenRepository],
 })
 export class KeyTokenModule {}

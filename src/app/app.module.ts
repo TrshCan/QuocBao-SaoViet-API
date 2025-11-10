@@ -1,3 +1,4 @@
+import { MulterModule } from '@nestjs/platform-express';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard, seconds } from '@nestjs/throttler';
@@ -6,15 +7,15 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { envConfig } from '../configs/config-env';
+import { envConfig, uploadDir } from '@/configs';
 import { PrismaModule } from '@/modules/shared/prisma/prisma.module';
-import { HealthModule } from '../modules/shared/health/health.module';
-import { IoredisModule } from '../modules/shared/ioredis/ioredis.module';
+import { HealthModule } from '@/modules/shared/health/health.module';
+import { IoredisModule } from '@/modules/shared/ioredis/ioredis.module';
 
-import { envConfigSchema } from '../common/validations/env-config';
+import { envConfigSchema } from '@/common/validations/env-config';
 import { KEY_THROTTLER } from '@/common/constants';
-import { MulterModule } from '@nestjs/platform-express';
-import { uploadDir } from '@/configs';
+
+import { AuthModule } from '@/modules/identity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -53,6 +54,7 @@ import { uploadDir } from '@/configs';
     PrismaModule,
     IoredisModule,
     HealthModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
