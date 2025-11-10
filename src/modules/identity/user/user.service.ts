@@ -7,7 +7,7 @@ import {
 
 import { UserRepository } from './user.repository';
 import { toErrorMessage } from '@/utils';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@/generated/prisma';
 
 @Injectable()
 export class UserService {
