@@ -21,7 +21,7 @@ import { IoredisService } from '../../shared/ioredis';
 import { KEY_CACHE } from '@/common/constants';
 import { decrypt, encrypt, getInfoData, toErrorMessage } from '@/utils';
 
-import { Prisma } from '@/generated/prisma';
+import { Prisma } from '@generated/prisma';
 import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { EnvConfig } from '@/configs';
 import type { AccessTokenPayload } from '@/types/jwt';

@@ -7,3 +7,4 @@ export * from './config-env';
 export * from './config-permission';
 export * from './config-role';
 export * from './config-upload-dir';
+export * from './config-swagger';

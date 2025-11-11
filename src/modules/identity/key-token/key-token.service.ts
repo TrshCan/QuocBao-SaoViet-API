@@ -21,7 +21,7 @@ import {
   TempTokenPayload,
 } from '@/types/jwt';
 import { KeyTokenRepository } from './key-token.repository';
-import { KeyToken } from '@/generated/prisma';
+import { KeyToken } from '@generated/prisma';
 
 @Injectable()
 export class KeyTokenService {

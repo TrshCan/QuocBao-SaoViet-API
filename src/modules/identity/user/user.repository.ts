@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '@/modules/shared/prisma';
 
-import type { Prisma } from '@/generated/prisma';
-import { DefaultArgs } from '@/generated/prisma/runtime/library';
+import type { Prisma } from '@generated/prisma';
+import { DefaultArgs } from '@generated/prisma/runtime/library';
 
 @Injectable()
 export class UserRepository {

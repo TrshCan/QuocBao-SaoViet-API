@@ -2,7 +2,7 @@
  * @description Registered Claim Names
  * @link https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
  */
-import { KeyToken } from '@/generated/prisma';
+import { KeyToken } from '@generated/prisma';
 import { JwtPayload } from 'jsonwebtoken';
 import { RoleScope, RoleType } from './role';
 

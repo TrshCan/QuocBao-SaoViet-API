@@ -67,7 +67,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UsePipes(new ZodValidationPipe({ body: authLoginSchema }))
-  async login(@Body() body: AuthLoginDto) {
+  async login(
+    @Body() body: AuthLoginDto,
+  ): Promise<ResponseController<unknown>> {
     const result = await this.authService.login(body);
 
     return {
@@ -84,7 +86,7 @@ export class AuthController {
   async verifyOtp(
     @Body() body: AuthVerifyOtpDto,
     @Headers(CLIENT_ID.toString()) userId: string,
-  ) {
+  ): Promise<ResponseController<unknown>> {
     const result = await this.authService.verifyOtp({ ...body, userId });
 
     return {
@@ -100,7 +102,7 @@ export class AuthController {
   async logout(
     @Req() request: Request,
     @Headers(AUTHORIZATION.toString()) accessToken: string,
-  ) {
+  ): Promise<ResponseController<unknown>> {
     const { id: userId, keyStoreId } = request.refresh;
     if (!userId || !keyStoreId || !accessToken) {
       throw new UnauthorizedException('Authentication required!');
@@ -125,7 +127,7 @@ export class AuthController {
   async handleRefreshToken(
     @Req() request: Request,
     @Headers(REFRESH_TOKEN.toString()) refreshToken: string,
-  ) {
+  ): Promise<ResponseController<unknown>> {
     const mergeRequest = {
       keyStoreId: request.refresh.keyStoreId,
       userId: request.refresh.id,
