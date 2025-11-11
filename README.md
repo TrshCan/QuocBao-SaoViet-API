@@ -64,3 +64,7 @@ $ yarn run test:cov
 - [Lifecycle events in NestJS](https://docs.nestjs.com/fundamentals/lifecycle-events)
 - [Query with Prisma](https://docs.nestjs.com/recipes/prisma#create-two-database-tables-with-prisma-migrate)
 - [Health check with Terminus](https://docs.nestjs.com/recipes/terminus#healthchecks-terminus)
+- [API Reference's NestJS](https://api-references-nestjs.netlify.app/api)
+- [Compodoc Reference in NestJS](https://docs.nestjs.com/recipes/documentation)
+- [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
+- [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)

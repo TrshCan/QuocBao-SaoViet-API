@@ -8,10 +8,10 @@ export const envConfigSchema = z.object({
   DATABASE_URL: z.url(),
   CORS_ORIGIN: z.string(),
   // JWT - (Remove in future)
-  JWT_SECRET: z.string(),
-  JWT_REFRESH_SECRET: z.string(),
-  JWT_EXPIRES_IN: z.string(),
-  JWT_REFRESH_EXPIRES_IN: z.string(),
+  // JWT_SECRET: z.string(),
+  // JWT_REFRESH_SECRET: z.string(),
+  // JWT_EXPIRES_IN: z.string(),
+  // JWT_REFRESH_EXPIRES_IN: z.string(),
   // TEMP_TOKEN_SECRET
   TEMP_TOKEN_SECRET: z.string(),
   TEMP_TOKEN_EXPIRES_IN: z.coerce
@@ -21,6 +21,9 @@ export const envConfigSchema = z.object({
     .default(5 * 60),
   // DEFAULT_SECRET_OTP
   DEFAULT_SECRET_OTP: z.string(),
+  // ENCRYPTION
+  ENCRYPTION_KEY: z.string(),
+  ENCRYPTION_IV_LENGTH: z.coerce.number().int().positive().default(16),
   // Nodemailer
   SMTP_HOST: z.string(),
   SMTP_PORT: z.coerce.number().int(),

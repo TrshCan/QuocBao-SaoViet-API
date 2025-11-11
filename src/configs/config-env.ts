@@ -10,15 +10,18 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   DATABASE_URL: process.env.DATABASE_URL,
   CORS_ORIGIN: process.env.CORS_ORIGIN,
   // JWT - (Remove in future)
-  JWT_SECRET: process.env.JWT_SECRET,
-  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
-  JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN,
+  // JWT_SECRET: process.env.JWT_SECRET,
+  // JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+  // JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+  // JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN,
   // TEMP_TOKEN_SECRET
   TEMP_TOKEN_SECRET: process.env.TEMP_TOKEN_SECRET,
   TEMP_TOKEN_EXPIRES_IN: process.env.TEMP_TOKEN_EXPIRES_IN,
   // DEFAULT_SECRET_OTP
   DEFAULT_SECRET_OTP: process.env.DEFAULT_SECRET_OTP,
+  // ENCRYPTION
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+  ENCRYPTION_IV_LENGTH: process.env.ENCRYPTION_IV_LENGTH,
   // Nodemailer
   SMTP_HOST: process.env.SMTP_HOST,
   SMTP_PORT: process.env.SMTP_PORT,

@@ -1,7 +1,20 @@
 // Prisma schema - minimal template
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
+}
+
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+  output   = "../documents/ERD.dbml"
+}
+
+generator openapi {
+  provider = "prisma-openapi"
+  output   = "../documents/openapi"
+  title    = "Saoviet API"
+  description   = "API for my application"
 }
 
 datasource db {
