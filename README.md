@@ -24,7 +24,7 @@ yarn dev:services
 yarn db:generate
 ```
 
-4. Migrate new Database
+5. Migrate new Database
 
 ```bash
 yarn db:migrate
@@ -55,6 +55,21 @@ $ yarn run test:e2e
 # test coverage
 $ yarn run test:cov
 ```
+
+## Run documents
+
+1. Compodoc:
+
+```bash
+yarn docs:app
+```
+
+2. Database markup language
+
+> At [documents/ERD.dbml](./documents/ERD.dbml/schema.dbml)
+
+Copy the schema.dbml content and visualize it as an Entity-Relationship Diagram
+> At [dbdiagram](https://dbdiagram.io/d)
 
 ## Deployment
 
