@@ -1,4 +1,5 @@
 import { Controller, Get, Inject } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import {
   DiskHealthIndicator,
   HealthCheck,
@@ -8,6 +9,8 @@ import {
   PrismaHealthIndicator,
   type HealthCheckResult,
 } from '@nestjs/terminus';
+
+import { KEY_THROTTLER } from '@/common/constants';
 
 import { PrismaService } from '@/modules/shared/prisma/prisma.service';
 import { REDIS_CLIENT } from '@/modules/shared/ioredis/ioredis.constants';
@@ -33,6 +36,7 @@ export class HealthController {
    * @returns The health check result
    */
   @Get()
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 10000 } })
   @HealthCheck()
   check(): Promise<HealthCheckResult> {
     return this.health.check([

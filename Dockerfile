@@ -22,7 +22,7 @@ COPY prisma ./prisma/
 # Development stage
 FROM base AS development
 ENV NODE_ENV=development
-RUN npm ci
+RUN yarn install --frozen-lockfile
 COPY . .
 RUN npx prisma generate
 EXPOSE 3000 9229
@@ -32,7 +32,7 @@ CMD ["npm", "run", "dev"]
 FROM base AS build
 
 # Install all dependencies (including devDependencies for building)
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -43,7 +43,7 @@ RUN npx prisma generate
 ENV NODE_ENV=production
 
 # Build the application
-RUN npm run build
+RUN yarn build
 
 # Compile seed scripts separately using dedicated tsconfig
 RUN npx tsc -p prisma/tsconfig.json

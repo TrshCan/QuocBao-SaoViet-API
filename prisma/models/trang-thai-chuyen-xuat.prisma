@@ -1,0 +1,4 @@
+model TrangThaiXuat {
+  id  String @id @default(uuid(7))
+  ten String
+}

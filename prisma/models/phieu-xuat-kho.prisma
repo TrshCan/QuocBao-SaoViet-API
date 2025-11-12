@@ -1,0 +1,18 @@
+// Phiếu xuất kho (Outbound)
+model PhieuXuatKho {
+  id          String   @id @default(uuid(7))
+  soPhieu     String   @unique
+  khoId       String
+  ngayXuat    DateTime @default(now())
+  trangThaiId Int? // FK to TrangThaiXuat
+  ghiChu      String?  @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(255)
+  updatedBy String?  @db.VarChar(255)
+  isDelete  Boolean  @default(false)
+
+  kho     Kho              @relation(fields: [khoId], references: [id])
+  chiTiet ChiTietXuatKho[]
+}

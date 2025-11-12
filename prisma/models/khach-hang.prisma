@@ -1,0 +1,18 @@
+// Khách hàng
+model KhachHang {
+  id           String  @id @default(uuid(7))
+  code         String? @db.VarChar(20)
+  ten          String
+  soDienThoai  String? @db.VarChar(20)
+  soDienThoai2 String? @db.VarChar(20)
+  email        String? @db.VarChar(120)
+  diaChi       String? @db.VarChar(255)
+  loaiKhach    String? @db.VarChar(50)
+  tenCongTy    String? @db.VarChar(150)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(255)
+  updatedBy String?  @db.VarChar(255)
+  isDelete  Boolean  @default(false)
+}

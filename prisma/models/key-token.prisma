@@ -1,0 +1,12 @@
+model KeyToken {
+  id               String @id @default(uuid(7))
+  userId           String
+  privateKey       String
+  publicKey        String
+  refreshToken     String
+  refreshTokenUsed String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String?  @db.VarChar(255)
+  updatedBy        String?  @db.VarChar(255)
+}

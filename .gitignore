@@ -55,5 +55,16 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Prisma
-generated/
+# Keep the generated Prisma Client + query engine out of version control
+/src/generated/prisma
+/generated/prisma
+
+# Compodoc / Prisma Docs Generator
+.documentation/
+
+# OpenAPI
+/documents/openapi/
+
+# ERD.dbml
+/documents/ERD.dbml
+ERD.md

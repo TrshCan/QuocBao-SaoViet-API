@@ -9,18 +9,18 @@ import { map } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 
 import type { ResponseTransform } from '@/types/response-transform';
-import type { ControllerResponse } from '@/types/response-controller';
+import type { ResponseController } from '@/types/response-controller';
 
 @Injectable()
 export class ResponseTransformInterceptor<T>
-  implements NestInterceptor<ControllerResponse<T>, ResponseTransform<T>>
+  implements NestInterceptor<ResponseController<T>, ResponseTransform<T>>
 {
   intercept(
     context: ExecutionContext,
-    next: CallHandler<ControllerResponse<T>>,
+    next: CallHandler<ResponseController<T>>,
   ): Observable<ResponseTransform<T>> {
     return next.handle().pipe(
-      map((data: ControllerResponse<T>): ResponseTransform<T> => {
+      map((data: ResponseController<T>): ResponseTransform<T> => {
         const getStatusCode = context
           .switchToHttp()
           .getResponse<ResponseTransform<T>>().statusCode;

@@ -24,7 +24,7 @@ yarn dev:services
 yarn db:generate
 ```
 
-4. Migrate new Database
+5. Migrate new Database
 
 ```bash
 yarn db:migrate
@@ -56,6 +56,21 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## Run documents
+
+1. Compodoc:
+
+```bash
+yarn docs:app
+```
+
+2. Database markup language
+
+> At [documents/ERD.dbml](./documents/ERD.dbml/schema.dbml)
+
+Copy the schema.dbml content and visualize it as an Entity-Relationship Diagram
+> At [dbdiagram](https://dbdiagram.io/d)
+
 ## Deployment
 
 ## Resources
@@ -64,3 +79,9 @@ $ yarn run test:cov
 - [Lifecycle events in NestJS](https://docs.nestjs.com/fundamentals/lifecycle-events)
 - [Query with Prisma](https://docs.nestjs.com/recipes/prisma#create-two-database-tables-with-prisma-migrate)
 - [Health check with Terminus](https://docs.nestjs.com/recipes/terminus#healthchecks-terminus)
+- [API Reference's NestJS](https://api-references-nestjs.netlify.app/api)
+- [Compodoc Reference in NestJS](https://docs.nestjs.com/recipes/documentation)
+- [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
+- [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
+- [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
+- [Prisma openapi](https://github.com/nitzano/prisma-openapi)

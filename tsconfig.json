@@ -24,7 +24,18 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@generated/*": [
+        "./generated/*"
       ]
     }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/generated/prisma/runtime"
+  ],
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval"
   }
 }

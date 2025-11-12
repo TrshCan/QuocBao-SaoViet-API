@@ -1,4 +1,4 @@
-export type ControllerResponse<T> = {
+export type ResponseController<T> = {
   message?: string;
   metadata: T;
 };

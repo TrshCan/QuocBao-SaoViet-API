@@ -1,8 +1,9 @@
+import { envConfig } from '@/configs';
 import crypto from 'crypto';
 
 const ENCRYPTION_KEY =
-  process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
-const IV_LENGTH = 16;
+  envConfig.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const IV_LENGTH = envConfig.ENCRYPTION_IV_LENGTH || 16;
 
 /**
  * Encrypts sensitive data before storing in Redis

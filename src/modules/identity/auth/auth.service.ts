@@ -1,46 +1,59 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
+  Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import bcrypt from 'bcrypt';
+import crypto from 'node:crypto';
 
-import { KeyTokenService } from '../key-token';
-import { MailService } from '../mail';
-import { OtpService } from '../otp';
+import { KeyTokenRepository, KeyTokenService } from '../key-token';
 import { UserRepository } from '../user';
-import { IoredisService } from '@/modules/shared/ioredis';
+import { IoredisService } from '../../shared/ioredis';
 
-import { KEY_CACHE } from '@/common/constants';
-import { encrypt, getInfoData } from '@/utils';
+import { getInfoData } from '@/utils';
 
+import { Prisma } from '@generated/prisma';
 import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { EnvConfig } from '@/configs';
-import { Prisma } from 'generated/prisma';
+import type { AccessTokenPayload } from '@/types/jwt';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly configService: ConfigService<EnvConfig>,
     private readonly keyTokenService: KeyTokenService,
-    private readonly mailService: MailService,
+    private readonly keyTokenRepository: KeyTokenRepository,
     private readonly userRepository: UserRepository,
-    private readonly otpService: OtpService,
     private readonly redisService: IoredisService,
   ) {}
 
   async login(body: AuthLoginDto) {
-    const foundUser: FoundUser | null =
+    const tempRefreshTokenSecret =
+      this.configService.get<string>('TEMP_REFRESH_TOKEN_SECRET') ??
+      crypto.randomBytes(32).toString('hex');
+    const publicKeyType =
+      this.configService.get<EnvConfig['PUBLIC_KEY_TYPE']>('PUBLIC_KEY_TYPE') ??
+      'spki';
+
+    const foundUser: FoundUserLogin | null =
       await this.userRepository.findOneByUsername(body.username, {
         select: {
           id: true,
           username: true,
+          fullName: true,
           email: true,
           password: true,
           secretOtp: true,
           status: true,
+          permissions: true,
+          role: true,
         },
       });
 
@@ -55,74 +68,89 @@ export class AuthService {
     const isMatch = await bcrypt.compare(body.password, foundUser.password);
     if (!isMatch) throw new UnauthorizedException('Authentication error!');
 
-    const defaultSecretOtp =
-      this.configService.get<string>('DEFAULT_SECRET_OTP');
-    if (!defaultSecretOtp) {
-      throw new BadRequestException('Default secret OTP is not set');
-    }
-    const otpCode = this.otpService.generateOtp(
-      foundUser.secretOtp ?? defaultSecretOtp,
-    );
-
     const { id: userId } = foundUser;
-    const isUserId = userId !== undefined ? userId : '';
-    const otpKey = `${KEY_CACHE.OTP}:${isUserId}`;
-    const deleteKey = `${KEY_CACHE.OTP}:delete:${isUserId}`;
-    const tempUserDataKey = `${KEY_CACHE.TEMP_USER_DATA}:${isUserId}`;
 
-    // Encrypt sensitive OTP data
-    const encryptedOtp = encrypt(otpCode);
-    const encryptedUserData = encrypt(
-      JSON.stringify({
-        userId: isUserId,
-        email: foundUser.email,
-        username: foundUser.username,
+    // Generate RSA key pair and create key token in parallel with Redis cleanup
+    const [keyPair] = await Promise.all([
+      // RSA key generation (CPU-bound, run in parallel)
+      Promise.resolve().then(() => {
+        const keys = crypto.generateKeyPairSync('rsa', {
+          modulusLength: 2048,
+          publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+          privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
+        });
+        return keys;
       }),
-    );
-
-    await Promise.all([
-      this.redisService.set(otpKey, encryptedOtp, 60 * 5),
-      this.redisService.set(deleteKey, isUserId, 60 * 5),
-      this.redisService.set(tempUserDataKey, encryptedUserData, 60 * 5),
     ]);
 
-    const emailStart = Date.now();
-    this.mailService
-      .sendOtpToEmail(foundUser.username, otpCode, foundUser.email)
-      .then(() => {
-        const emailDuration = Date.now() - emailStart;
-        console.log(
-          `[ASYNC] - Login OTP email sent successfully in ${emailDuration}ms`,
-        );
-      })
-      .catch((emailErr) => {
-        console.error('[ASYNC] - Email send failed:', emailErr);
+    // Create key token (now with generated keys)
+    const { publicKey: publicKeyString, keyStoreId } =
+      await this.keyTokenService.createKeyToken({
+        userId: userId,
+        publicKey: keyPair.publicKey,
+        privateKey: keyPair.privateKey,
+        refreshToken: tempRefreshTokenSecret,
       });
 
-    // Create temporary JWT token for OTP verification
-    const { tempToken, expiresIn } = this.keyTokenService.createTempToken({
-      userId: isUserId,
-      email: foundUser.email,
-      type: 'login',
+    if (!publicKeyString || !keyStoreId) {
+      throw new BadRequestException('Failed to create key token');
+    }
+
+    // Generate JWT tokens with proper structure
+    const publicKeyObject = crypto.createPublicKey(publicKeyString);
+    const publicKeyToString = publicKeyObject.export({
+      type: publicKeyType,
+      format: 'pem',
     });
 
-    const user = getInfoData<FoundUser, 'id' | 'username' | 'email'>({
-      fields: ['id', 'username', 'email'],
+    const tokens = this.keyTokenService.createTokenPair(
+      {
+        id: foundUser.id,
+        email: foundUser.email ?? '',
+        username: foundUser.username,
+        fullName: foundUser.fullName,
+        role: 'super_admin',
+        roleScope: 'SYSTEM',
+        permissions: [],
+        aud: 'access:common',
+      },
+      {
+        id: foundUser.id,
+        email: foundUser.email ?? '',
+        keyStoreId: keyStoreId,
+        sessionId: '',
+        aud: 'refresh:common',
+      },
+      publicKeyToString,
+      keyPair.privateKey,
+    );
+
+    // Update field refreshToken of KeyToken
+    await this.keyTokenRepository.updateRefreshTokenById(
+      keyStoreId,
+      tokens.refreshToken,
+    );
+
+    const userData = getInfoData<
+      FoundUserLogin,
+      'id' | 'username' | 'email' | 'fullName' | 'role' | 'permissions'
+    >({
+      fields: ['id', 'username', 'email', 'fullName', 'role', 'permissions'],
       object: foundUser,
     });
 
     return {
-      user,
-      tempToken,
-      expiresIn,
+      user: userData,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresInAccessToken: tokens.exp_accessToken,
+      expiresInRefreshToken: tokens.exp_refreshToken,
+      iatAccessToken: tokens.iat_accessToken,
+      iatRefreshToken: tokens.iat_refreshToken,
     };
   }
 
-  async verifyOtp() {}
-
-  async handleRefreshToken() {}
-
-  logout({
+  async logout({
     userId,
     keyStoreId,
     accessToken,
@@ -135,25 +163,158 @@ export class AuthService {
       throw new UnauthorizedException('Authentication required!');
     }
 
-    // const delKey = await this.keyTokenService.removeKeyById(keyStoreId);
-    // if (!delKey) {
-    //   throw new UnauthorizedException('Key not found!');
-    // }
+    const delKey = await this.keyTokenService.removeKeyById(keyStoreId);
 
-    // await this.keyTokenService.deleteKeyStoreCache(userId);
+    // Clear cache (if applicable)
+    await this.keyTokenService.deleteKeyStoreCache(userId);
+
+    const { exp } =
+      this.keyTokenService.decodeJWT<AccessTokenPayload>(accessToken);
+    if (!exp) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    const ttl = exp - Math.floor(Date.now() / 1000);
+    if (ttl <= 0) {
+      throw new UnauthorizedException('Token has expired');
+    }
+    await this.keyTokenService.addTokenToBlacklist(accessToken, ttl);
+
+    return delKey;
+  }
+
+  async handleRefreshToken({
+    keyStoreId,
+    userId,
+    email,
+    refreshToken,
+  }: {
+    keyStoreId: string;
+    userId: string;
+    email: string;
+    refreshToken: string;
+  }) {
+    const keyStoreData = await this.keyTokenRepository.findOneById(keyStoreId, {
+      select: {
+        id: true,
+        refreshToken: true,
+        refreshTokenUsed: true,
+        publicKey: true,
+        privateKey: true,
+      },
+    });
+
+    if (!keyStoreData) {
+      throw new NotFoundException('Key store not found');
+    }
+
+    const {
+      id: currentKeyStoreId,
+      refreshToken: keyStoreRefreshToken,
+      refreshTokenUsed: keyStoreRefreshTokenUsed,
+      publicKey: keyStorePublicKey,
+      privateKey: keyStorePrivateKey,
+    } = keyStoreData;
+
+    const isRefreshTokenReused =
+      keyStoreRefreshTokenUsed.includes(refreshToken);
+
+    if (isRefreshTokenReused) {
+      await this.keyTokenService.deleteKeyByUserId(userId);
+      throw new ForbiddenException('Something wrong happened, please relogin!');
+    }
+
+    if (keyStoreRefreshToken !== refreshToken) {
+      throw new UnauthorizedException('You are not registered!');
+    }
+
+    const isFoundUser = await this.userRepository.findOneByEmail(email, {
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        fullName: true,
+        role: true,
+        permissions: true,
+        status: true,
+      },
+    });
+
+    if (!isFoundUser) {
+      throw new NotFoundException('User not found!');
+    }
+
+    const tokens = this.keyTokenService.createTokenPair(
+      {
+        id: isFoundUser.id,
+        email: isFoundUser.email ?? '',
+        username: isFoundUser.username,
+        fullName: isFoundUser.fullName,
+        role: 'super_admin',
+        roleScope: 'SYSTEM',
+        permissions: [],
+        aud: 'access:common',
+      },
+      {
+        id: isFoundUser.id,
+        email: isFoundUser.email ?? '',
+        keyStoreId: currentKeyStoreId,
+        sessionId: '',
+        aud: 'refresh:common',
+      },
+      keyStorePublicKey,
+      keyStorePrivateKey,
+    );
+
+    const getKeyStore = await this.keyTokenRepository.findOneById(
+      currentKeyStoreId,
+      {
+        select: {
+          id: true,
+        },
+      },
+    );
+    if (!getKeyStore) {
+      throw new NotFoundException('Key store not found');
+    }
+
+    await this.keyTokenRepository.updateOneById(getKeyStore.id, {
+      refreshToken: tokens.refreshToken,
+      refreshTokenUsed: [...keyStoreRefreshTokenUsed, refreshToken],
+    });
+
+    return {
+      user: isFoundUser,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresInAccessToken: tokens.exp_accessToken,
+      expiresInRefreshToken: tokens.exp_refreshToken,
+      iatAccessToken: tokens.iat_accessToken,
+      iatRefreshToken: tokens.iat_refreshToken,
+    };
   }
 }
 
-type FoundUser = Pick<
+type FoundUserLogin = Pick<
   Prisma.UserGetPayload<{
     select: {
       id: true;
       username: true;
+      fullName: true;
       email: true;
       password: true;
+      role: true;
+      permissions: true;
       secretOtp: true;
       status: true;
     };
   }>,
-  'id' | 'username' | 'email' | 'password' | 'secretOtp' | 'status'
+  | 'id'
+  | 'username'
+  | 'fullName'
+  | 'email'
+  | 'password'
+  | 'role'
+  | 'permissions'
+  | 'secretOtp'
+  | 'status'
 >;
