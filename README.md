@@ -69,3 +69,4 @@ $ yarn run test:cov
 - [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
 - [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
 - [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
+- [Prisma openapi](https://github.com/nitzano/prisma-openapi)
