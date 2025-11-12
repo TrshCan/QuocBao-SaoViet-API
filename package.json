@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "docs:app": "npx @compodoc/compodoc -p tsconfig.json -s -r 8078 -d .documentation/app --includes ./documents",
+    "docs:prisma": "npx serve -l 8088 .documentation/prisma",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -25,6 +26,7 @@
     "db:format": "yarn prisma format",
     "db:version": "yarn prisma version",
     "db:debug": "yarn prisma debug",
+    "typedoc:generate:prisma": "npx typedoc generated/prisma/index.d.ts --out .documentation/prisma",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -83,6 +85,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1",
+    "typedoc": "^0.28.14",
     "ua-parser-js": "^2.0.6",
     "uuid": "^13.0.0",
     "zod": "^4.1.12"

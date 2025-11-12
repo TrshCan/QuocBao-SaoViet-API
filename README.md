@@ -24,6 +24,12 @@ yarn dev:services
 yarn db:generate
 ```
 
+4. OPTION - Create document from Prisma Client by TypeDoc
+
+```bash
+yarn typedoc:generate:prisma
+```
+
 5. Migrate new Database
 
 ```bash
@@ -64,7 +70,13 @@ $ yarn run test:cov
 yarn docs:app
 ```
 
-2. Database markup language
+2. Typedoc - Prisma Client
+
+```bash
+yarn docs:prisma
+```
+
+3. Database markup language
 
 > At [documents/ERD.dbml](./documents/ERD.dbml/schema.dbml)
 
@@ -85,3 +97,4 @@ Copy the schema.dbml content and visualize it as an Entity-Relationship Diagram
 - [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
 - [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
 - [Prisma openapi](https://github.com/nitzano/prisma-openapi)
+- [Reference's TypeDoc](https://typedoc.org/index.html)
