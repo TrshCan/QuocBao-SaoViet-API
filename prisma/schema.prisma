@@ -27,8 +27,348 @@ datasource db {
 // - createdBy/updatedBy: người tạo/cập nhật (tham chiếu User.id – có thể để trống giai đoạn đầu)
 // - isDelete: cờ xoá mềm (True = ẩn trên UI, không hiển thị trong danh sách)
 
-enum UserStatus {
-  active
-  inactive
-  suspended
+model User {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  fullName   String
+  role       String    // later: enum (admin, warehouse, accountant, ...)
+  email      String?   @unique
+  phone      String?   @db.VarChar(20)
+  isActive   Boolean   @default(true)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  createdBy  Int?      @db.Integer
+  updatedBy  Int?      @db.Integer
+  isDelete   Boolean   @default(false)
+
+  // Quan hệ phân quyền
+  phanQuyens PhanQuyen[]
+}
+
+model DonViTinh { // Đơn vị tính
+  id        Int       @id @default(autoincrement())
+  ten       String
+  moTa      String?   @db.VarChar(255)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy Int?      @db.Integer
+  updatedBy Int?      @db.Integer
+  isDelete  Boolean   @default(false)
+
+  sanPhams  SanPham[]
+}
+
+model Kho { // Kho
+  id         Int       @id @default(autoincrement())
+  maKho      String    @unique
+  tenKho     String
+  diaChi     String?   @db.VarChar(255)
+  dienTich   Decimal?  @db.Decimal(10,2)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  createdBy  Int?      @db.Integer
+  updatedBy  Int?      @db.Integer
+  isDelete   Boolean   @default(false)
+
+  viTriKhos  ViTriKho[]
+  tonKhos    TonKho[]
+  // Quan hệ đối ứng cho các chứng từ
+  phieuNhapKhos PhieuNhapKho[]
+  phieuXuatKhos PhieuXuatKho[]
+  phieuChuyenKhoXuat PhieuChuyenKho[] @relation("KhoXuat")
+  phieuChuyenKhoNhap PhieuChuyenKho[] @relation("KhoNhap")
+}
+
+model ViTriKho { // Vị trí (ô/kệ) trong kho
+  id        Int      @id @default(autoincrement())
+  khoId     Int
+  maViTri   String   @unique
+  moTa      String?  @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy Int?     @db.Integer
+  updatedBy Int?     @db.Integer
+  isDelete  Boolean  @default(false)
+
+  kho       Kho      @relation(fields: [khoId], references: [id])
+  tonKhos   TonKho[]
+  tonKhoKys TonKhoKy[]
+}
+
+model SanPham { // Sản phẩm (danh mục hàng hoá)
+  id          Int        @id @default(autoincrement())
+  maSanPham   String     @unique
+  tenSanPham  String
+  nhom       String?     @db.VarChar(100)
+  moTa        String?    @db.VarChar(255)
+  donViTinhId Int
+
+  // Thuộc tính quản lý
+  quanLyLo     Boolean    @default(false) // có quản lý theo lô
+  quanLyHSD    Boolean    @default(false) // có quản lý hạn sử dụng
+  quanLySerial Boolean    @default(false) // có quản lý serial
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   Int?       @db.Integer
+  updatedBy   Int?       @db.Integer
+  isDelete    Boolean    @default(false)
+
+  donViTinh   DonViTinh  @relation(fields: [donViTinhId], references: [id])
+  tonKhos     TonKho[]
+  tonKhoKys   TonKhoKy[]
+  ctNhapKhos  ChiTietNhapKho[]
+  ctXuatKhos  ChiTietXuatKho[]
+  ctChuyenKhos ChiTietChuyenKho[]
+}
+
+// Bảng tồn kho: số lượng hiện có theo kho/vị trí/sản phẩm/lô/serial
+model TonKho {
+  id         Int       @id @default(autoincrement())
+  khoId      Int
+  viTriKhoId Int?
+  sanPhamId  Int
+  soLo       String?   @db.VarChar(100)
+  hanSuDung  DateTime?
+  soSerial   String?   @db.VarChar(100)
+  soLuong    Decimal   @db.Decimal(18,3) @default(0)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  createdBy  Int?      @db.Integer
+  updatedBy  Int?      @db.Integer
+  isDelete   Boolean   @default(false)
+
+  kho        Kho       @relation(fields: [khoId], references: [id])
+  viTriKho   ViTriKho? @relation(fields: [viTriKhoId], references: [id])
+  sanPham    SanPham   @relation(fields: [sanPhamId], references: [id])
+
+  @@index([khoId, viTriKhoId, sanPhamId])
+  @@index([sanPhamId, soLo, soSerial])
+}
+
+// Danh mục trạng thái (ví dụ cho xuất/chuyển) — có thể mở rộng theo nghiệp vụ
+model TrangThaiChuyen {
+  id   Int    @id @default(autoincrement())
+  ten  String
+}
+
+model TrangThaiXuat {
+  id   Int    @id @default(autoincrement())
+  ten  String
+}
+
+// Trạng thái nhập kho
+enum TrangThaiNhapEnum {
+  DRAFT
+  DONE
+}
+
+// Phiếu nhập kho (Inbound)
+model PhieuNhapKho {
+  id          Int       @id @default(autoincrement())
+  soPhieu     String    @unique
+  khoId       Int
+  ngayNhap    DateTime  @default(now())
+  trangThai   TrangThaiNhapEnum @default(DRAFT)
+  ghiChu      String?   @db.VarChar(255)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   Int?      @db.Integer
+  updatedBy   Int?      @db.Integer
+  isDelete    Boolean   @default(false)
+
+  kho         Kho       @relation(fields: [khoId], references: [id])
+  chiTiet     ChiTietNhapKho[]
+}
+
+model ChiTietNhapKho {
+  id           Int      @id @default(autoincrement())
+  phieuId      Int
+  sanPhamId    Int
+  soLuong      Decimal  @db.Decimal(18,3)
+  donGia       Decimal? @db.Decimal(18,2)
+  soLo         String?  @db.VarChar(100)
+  hanSuDung    DateTime?
+  soSerial     String?  @db.VarChar(100)
+
+  phieu        PhieuNhapKho @relation(fields: [phieuId], references: [id])
+  sanPham      SanPham      @relation(fields: [sanPhamId], references: [id])
+
+  @@index([phieuId])
+}
+
+// Phiếu xuất kho (Outbound)
+model PhieuXuatKho {
+  id          Int       @id @default(autoincrement())
+  soPhieu     String    @unique
+  khoId       Int
+  ngayXuat    DateTime  @default(now())
+  trangThaiId Int?      // FK to TrangThaiXuat
+  ghiChu      String?   @db.VarChar(255)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   Int?      @db.Integer
+  updatedBy   Int?      @db.Integer
+  isDelete    Boolean   @default(false)
+
+  kho         Kho       @relation(fields: [khoId], references: [id])
+  chiTiet     ChiTietXuatKho[]
+}
+
+model ChiTietXuatKho {
+  id           Int      @id @default(autoincrement())
+  phieuId      Int
+  sanPhamId    Int
+  soLuong      Decimal  @db.Decimal(18,3)
+  soLo         String?  @db.VarChar(100)
+  hanSuDung    DateTime?
+  soSerial     String?  @db.VarChar(100)
+
+  phieu        PhieuXuatKho @relation(fields: [phieuId], references: [id])
+  sanPham      SanPham      @relation(fields: [sanPhamId], references: [id])
+
+  @@index([phieuId])
+}
+
+// Phiếu chuyển kho (giữa kho hoặc giữa các vị trí)
+model PhieuChuyenKho {
+  id            Int       @id @default(autoincrement())
+  soPhieu       String    @unique
+  khoXuatId     Int
+  khoNhapId     Int
+  ngayChuyen    DateTime  @default(now())
+  trangThaiId   Int?      // FK to TrangThaiChuyen
+  ghiChu        String?   @db.VarChar(255)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     Int?      @db.Integer
+  updatedBy     Int?      @db.Integer
+  isDelete      Boolean   @default(false)
+
+  khoXuat       Kho       @relation("KhoXuat", fields: [khoXuatId], references: [id])
+  khoNhap       Kho       @relation("KhoNhap", fields: [khoNhapId], references: [id])
+  chiTiet       ChiTietChuyenKho[]
+}
+
+model ChiTietChuyenKho {
+  id           Int      @id @default(autoincrement())
+  phieuId      Int
+  sanPhamId    Int
+  soLuong      Decimal  @db.Decimal(18,3)
+  soLo         String?  @db.VarChar(100)
+  hanSuDung    DateTime?
+  soSerial     String?  @db.VarChar(100)
+
+  phieu        PhieuChuyenKho @relation(fields: [phieuId], references: [id])
+  sanPham      SanPham        @relation(fields: [sanPhamId], references: [id])
+
+  @@index([phieuId])
+}
+
+// Nhà cung cấp
+model NhaCungCap {
+  id            Int      @id @default(autoincrement())
+  tenNhaCungCap String
+  diaChi        String?  @db.VarChar(255)
+  nguoiLienHe   String?  @db.VarChar(100)
+  soDienThoai   String?  @db.VarChar(20)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     Int?     @db.Integer
+  updatedBy     Int?     @db.Integer
+  isDelete      Boolean  @default(false)
+}
+
+// Khách hàng
+model KhachHang {
+  id           Int      @id @default(autoincrement())
+  code         String?  @db.VarChar(20)
+  ten          String
+  soDienThoai  String?  @db.VarChar(20)
+  soDienThoai2 String?  @db.VarChar(20)
+  email        String?  @db.VarChar(120)
+  diaChi       String?  @db.VarChar(255)
+  loaiKhach    String?  @db.VarChar(50)
+  tenCongTy    String?  @db.VarChar(150)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    Int?     @db.Integer
+  updatedBy    Int?     @db.Integer
+  isDelete     Boolean  @default(false)
+}
+
+// Đơn vị vận chuyển/đối tác giao nhận
+model DonViChuyen {
+  id          Int      @id @default(autoincrement())
+  code        String?  @db.VarChar(20)
+  tenDonVi    String
+  diaChi      String?  @db.VarChar(255)
+  duongDayNong String? @db.VarChar(100)
+  soDienThoai String?  @db.VarChar(20)
+  website     String?  @db.VarChar(120)
+  ghiChu      String?  @db.VarChar(255)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   Int?     @db.Integer
+  updatedBy   Int?     @db.Integer
+  isDelete    Boolean  @default(false)
+}
+
+// Tồn kho kỳ (snapshot theo chu kỳ)
+model TonKhoKy {
+  id         Int      @id @default(autoincrement())
+  ky         Int
+  sanPhamId  Int
+  viTriKhoId Int?
+  tonDauKy   Decimal  @db.Decimal(18,3) @default(0)
+  nhapTrongKy Decimal @db.Decimal(18,3) @default(0)
+  xuatTrongKy Decimal @db.Decimal(18,3) @default(0)
+  tonCuoiKy  Decimal  @db.Decimal(18,3) @default(0)
+
+  sanPham    SanPham  @relation(fields: [sanPhamId], references: [id])
+  viTriKho   ViTriKho? @relation(fields: [viTriKhoId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  Int?     @db.Integer
+  updatedBy  Int?     @db.Integer
+  isDelete   Boolean  @default(false)
+
+  @@index([sanPhamId, viTriKhoId])
+}
+
+// Chức năng (module/tính năng hệ thống)
+model ChucNang {
+  id          Int       @id @default(autoincrement())
+  tenChucNang String
+  description String?   @db.VarChar(255)
+
+  phanQuyens  PhanQuyen[]
+}
+
+// Phân quyền theo chức năng cho người dùng
+model PhanQuyen {
+  id           Int    @id @default(autoincrement())
+  chucNangId   Int
+  nguoiDungId  Int
+  view         Int    @default(0)
+  insert       Int    @default(0)
+  update       Int    @default(0)
+  delete       Int    @default(0)
+
+  chucNang     ChucNang @relation(fields: [chucNangId], references: [id])
+  nguoiDung    User     @relation(fields: [nguoiDungId], references: [id])
+
+  @@unique([chucNangId, nguoiDungId])
 }

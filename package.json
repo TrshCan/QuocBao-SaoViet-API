@@ -6,8 +6,12 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+<<<<<<< HEAD
+    "dev": "nest start --watch",
+=======
     "docs:app": "npx @compodoc/compodoc -p tsconfig.json -s -r 8078 -d .documentation/app --includes ./documents",
     "docs:prisma": "npx serve -l 8088 .documentation/prisma",
+>>>>>>> main
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -66,9 +70,12 @@
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.4.0",
     "@prisma/client": "^6.19.0",
+<<<<<<< HEAD
+=======
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.1",
     "axios": "^1.13.2",
+>>>>>>> main
     "bcrypt": "^6.0.0",
     "bullmq": "^5.63.0",
     "compression": "^1.8.1",
@@ -114,7 +121,9 @@
     "@types/supertest": "^6.0.2",
     "@types/ua-parser-js": "^0.7.39",
     "@types/uuid": "^11.0.0",
-    "eslint": "^9.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
