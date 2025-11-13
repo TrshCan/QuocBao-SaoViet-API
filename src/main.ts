@@ -1,14 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppBootstrap } from './infrastructures/bootstrap/app-boostrap';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
-  app.setGlobalPrefix('api');
-
-  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-  await app.listen(port);
-  // eslint-disable-next-line no-console
-  console.log(`API running at http://localhost:${port}`);
+  const appBootstrap = new AppBootstrap();
+  await appBootstrap.bootstrap();
+  await appBootstrap.listen();
 }
 
 bootstrap();

@@ -1,0 +1,17 @@
+// Phiếu nhập kho (Inbound)
+model PhieuNhapKho {
+  id       String   @id @default(uuid(7))
+  soPhieu  String   @unique
+  khoId    String
+  ngayNhap DateTime @default(now())
+  ghiChu   String?  @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(255)
+  updatedBy String?  @db.VarChar(255)
+  isDelete  Boolean  @default(false)
+
+  kho     Kho              @relation(fields: [khoId], references: [id])
+  chiTiet ChiTietNhapKho[]
+}

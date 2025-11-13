@@ -1,0 +1,15 @@
+// Phân quyền theo chức năng cho người dùng
+model PhanQuyen {
+  id          String @id @default(uuid(7))
+  chucNangId  String
+  nguoiDungId String
+  view        Int    @default(0)
+  insert      Int    @default(0)
+  update      Int    @default(0)
+  delete      Int    @default(0)
+
+  chucNang  ChucNang @relation(fields: [chucNangId], references: [id])
+  nguoiDung User     @relation(fields: [nguoiDungId], references: [id])
+
+  @@unique([chucNangId, nguoiDungId])
+}

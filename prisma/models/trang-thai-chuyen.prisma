@@ -1,0 +1,5 @@
+// Danh mục trạng thái (ví dụ cho xuất/chuyển) — có thể mở rộng theo nghiệp vụ
+model TrangThaiChuyen {
+  id  String @id @default(uuid(7))
+  ten String
+}

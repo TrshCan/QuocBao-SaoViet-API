@@ -1,0 +1,310 @@
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import JWT, { VerifyErrors } from 'jsonwebtoken';
+
+import { KEY_CACHE } from '@/common/constants';
+import { toErrorMessage } from '@/utils';
+import { IoredisService } from '@/modules/shared/ioredis';
+import {
+  AccessTokenPayload,
+  KeyStoreForJWT,
+  PairToken,
+  RefreshTokenPayload,
+} from '@/types/jwt';
+import { KeyTokenRepository } from './key-token.repository';
+import { KeyToken } from '@generated/prisma';
+
+@Injectable()
+export class KeyTokenService {
+  private readonly logger = new Logger(KeyTokenService.name);
+
+  constructor(
+    private readonly redisService: IoredisService,
+    private readonly keyTokenRepository: KeyTokenRepository,
+  ) {}
+
+  async createKeyToken({
+    userId,
+    publicKey,
+    privateKey,
+    refreshToken,
+  }: Pick<KeyToken, 'userId' | 'publicKey' | 'privateKey' | 'refreshToken'>) {
+    try {
+      const filter = { userId };
+      const update = {
+        refreshToken,
+        publicKey,
+        privateKey,
+        refreshTokenUsed: [refreshToken],
+      };
+
+      // Add refresh token used to update
+      console.log('refreshToken', refreshToken);
+      // update.refreshTokenUsed.push(refreshToken);
+
+      // Single-session policy: Delete all existing sessions for this user
+      const existingRecords = await this.keyTokenRepository.findManyByFilter(
+        filter,
+        {
+          select: {
+            id: true,
+          },
+        },
+      );
+
+      if (existingRecords && existingRecords.length > 0) {
+        this.logger.log(
+          'Single-session policy: Invalidating existing sessions',
+          {
+            userId,
+            sessionCount: existingRecords.length,
+          },
+        );
+
+        // Delete all existing key tokens (sessions) for this user
+        await this.keyTokenRepository.deleteManyByFilter(filter);
+
+        // Invalidate cache for the user
+        await this.invalidateKeyStoreCache(userId);
+      }
+
+      // Create new key token (new session)
+      const tokens = await this.keyTokenRepository.createOne({
+        ...filter,
+        ...update,
+      });
+
+      // Update cache asynchronously (fire and forget)
+      const cacheStart = Date.now();
+      this.updateKeyStoreCache(tokens)
+        .then(() => {
+          const cacheDuration = Date.now() - cacheStart;
+          console.log(`[ASYNC] KeyToken cache updated in ${cacheDuration}ms`);
+        })
+        .catch((err) => {
+          console.error('Background cache update error:', err);
+        });
+      // Extract publicKey value and keyStoreId
+      const publicKeyValue = tokens.publicKey;
+      const keyStoreId = tokens.id;
+
+      this.logger.log('New session created', {
+        userId,
+        keyStoreId,
+      });
+
+      return {
+        publicKey: publicKeyValue,
+        keyStoreId: keyStoreId,
+      };
+    } catch (error) {
+      this.logger.error('Error create key token:', toErrorMessage(error));
+      throw new InternalServerErrorException('Failed to create key token');
+    }
+  }
+
+  createTokenPair(
+    payloadAT: string | Buffer | AccessTokenPayload,
+    payloadRT: string | Buffer | RefreshTokenPayload,
+    publicKey: string | Buffer<ArrayBufferLike>,
+    privateKey: string,
+  ): PairToken {
+    try {
+      const accessToken = JWT.sign(payloadAT, privateKey, {
+        algorithm: 'RS256',
+        expiresIn: '10H',
+      });
+
+      const refreshToken = JWT.sign(payloadRT, privateKey, {
+        algorithm: 'RS256',
+        expiresIn: '3D',
+      });
+
+      // Decode the access token to extract iat and exp
+      const decodedAccessToken = JWT.decode(accessToken) as AccessTokenPayload;
+      const decodedRefreshToken = JWT.decode(
+        refreshToken,
+      ) as RefreshTokenPayload;
+      const iat_accessToken = decodedAccessToken.iat;
+      const exp_accessToken = decodedAccessToken.exp;
+      const iat_refreshToken = decodedRefreshToken.iat;
+      const exp_refreshToken = decodedRefreshToken.exp;
+
+      // Verify access token asynchronously without blocking the response
+      setImmediate(() => {
+        JWT.verify(accessToken, publicKey, (err: JWT.VerifyErrors) =>
+          this.verifyCallbackOption(err, decodedAccessToken),
+        );
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+        iat_accessToken,
+        exp_accessToken,
+        iat_refreshToken,
+        exp_refreshToken,
+      } as PairToken;
+    } catch (error) {
+      this.logger.error('error createTokenPair:', toErrorMessage(error));
+      throw new InternalServerErrorException('Failed to create token pair');
+    }
+  }
+
+  verifyJWT(token: string, keySecret: string): string | JWT.JwtPayload {
+    try {
+      return JWT.verify(token, keySecret, {
+        algorithms: ['RS256'],
+      });
+    } catch (error) {
+      this.logger.error('Error verify JWT:', error);
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  async requireKeyStore(userId: string) {
+    const cacheKey = `${KEY_CACHE.KEY_STORE}:${userId}`;
+    try {
+      // Try to get from Redis cache first
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        const keyStore = JSON.parse(cachedData) as KeyStoreForJWT;
+        return keyStore;
+      }
+
+      // Cache miss - get from database
+      const keyStore = await this.findByUserId(userId);
+      if (!keyStore) {
+        throw new NotFoundException('Key store not found');
+      }
+
+      // Store in Redis cache with 1 hour TTL
+      await this.redisService.set(cacheKey, JSON.stringify(keyStore), 60 * 60);
+
+      return keyStore;
+    } catch (error) {
+      const message = toErrorMessage(error);
+      this.logger.error('Redis cache error, falling back to database', {
+        error: message,
+      });
+      throw new InternalServerErrorException('Failed to get key store');
+    }
+  }
+
+  async removeKeyById(keyTokenId: string) {
+    try {
+      const result = await this.keyTokenRepository.deleteById(keyTokenId);
+      return result;
+    } catch (error) {
+      const message = toErrorMessage(error);
+      this.logger.error('Failed to remove key by id', {
+        error: message,
+      });
+      throw new InternalServerErrorException('Failed to remove key by id');
+    }
+  }
+
+  async findOneById() {}
+  async findByUserId(userId: string) {
+    return await this.keyTokenRepository.findOneByUserId(userId, {
+      select: {
+        id: true,
+        privateKey: true,
+        publicKey: true,
+        refreshToken: true,
+        refreshTokenUsed: true,
+      },
+    });
+  }
+  async findByRefreshTokenUsed() {}
+  async findByRefreshToken() {}
+  async deleteKeyByUserId(userId: string) {
+    const result = await this.keyTokenRepository.deleteByUserId(userId);
+    // Invalidate cache after deletion
+    await this.invalidateKeyStoreCache(userId);
+    return result;
+  }
+
+  /**
+   * Invalidate key store cache for a specific user
+   */
+  async invalidateKeyStoreCache(userId: string): Promise<void> {
+    try {
+      const cacheKey = `${KEY_CACHE.KEY_STORE}:${userId}`;
+      await this.redisService.delete(cacheKey);
+      this.logger.log('Key store cache invalidated', { userId });
+    } catch (error) {
+      this.logger.warn('Failed to invalidate key store cache:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  /**
+   * Update key store cache after modifications
+   */
+  async updateKeyStoreCache(keyStore: KeyToken): Promise<void> {
+    try {
+      const cacheKey = `keyStore:${keyStore.userId}`;
+      await this.redisService.set(
+        cacheKey,
+        JSON.stringify(keyStore),
+        60 * 60 * 1,
+      ); // 1 hour
+    } catch (error) {
+      this.logger.warn('Failed to update key store cache:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  async deleteKeyStoreCache(userId: string): Promise<void> {
+    try {
+      const cacheKey = `keyStore:${userId}`;
+      await this.redisService.delete(cacheKey);
+    } catch (error) {
+      this.logger.warn('Failed to delete key store cache:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  async addTokenToBlacklist(token: string, ttl: number): Promise<void> {
+    try {
+      // const { exp } = JWT.decode(token) as AccessTokenPayload;
+      // const ttl = exp - Math.floor(Date.now() / 1000);
+      await this.redisService.set(
+        `${KEY_CACHE.BLACKLIST}:${token}`,
+        'true',
+        ttl,
+      );
+    } catch (error) {
+      this.logger.warn('Failed to add token to blacklist:', {
+        error: toErrorMessage(error),
+      });
+    }
+  }
+
+  decodeJWT<T>(token: string): T {
+    return JWT.decode(token) as T;
+  }
+
+  verifyCallbackOption(
+    err: VerifyErrors | null,
+    decoded: JWT.JwtPayload | string | undefined,
+  ) {
+    if (err) {
+      console.error(`error verify::`, err);
+    } else {
+      console.log(`decode verify::`, decoded);
+      // TODO: Add logic to save to session
+      // saveToSession(decoded);
+    }
+  }
+}
