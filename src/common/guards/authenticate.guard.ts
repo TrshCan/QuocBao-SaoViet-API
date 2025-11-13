@@ -18,6 +18,7 @@ import {
   setAccessUser,
   validateUserId,
 } from '@/utils';
+import { KeyStoreForJWT } from '@/types/jwt';
 
 import { AUTHORIZATION, CLIENT_ID, KEY_CACHE } from '@/common/constants';
 
@@ -48,11 +49,12 @@ export class JwtAuthenticateGuard implements CanActivate {
         );
 
       // Get key store for user
-      const keyStore = await this.keyTokenService.requireKeyStore(userId);
+      const keyStore: KeyStoreForJWT =
+        await this.keyTokenService.requireKeyStore(userId);
 
       const decodedUser = this.keyTokenService.verifyJWT(
         accessToken,
-        keyStore.publicKey,
+        keyStore.publicKey as string,
       ) as AccessTokenPayload;
 
       validateUserId(userId, decodedUser.id);

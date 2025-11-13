@@ -47,4 +47,3 @@ export class ProductsService {
     return found;
   }
 }
-

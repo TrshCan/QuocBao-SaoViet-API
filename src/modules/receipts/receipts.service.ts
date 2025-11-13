@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, TrangThaiNhapEnum } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
@@ -15,8 +19,20 @@ export class ReceiptsService {
     return `PNK-${y}${m}${d}-${t}`;
   }
 
-  async createReceipt(dto: { khoId: number; ghiChu?: string; items: Array<{ sanPhamId: number; soLuong: string; donGia?: string; soLo?: string; hanSuDung?: string; soSerial?: string; }>; }) {
-    if (!dto.items?.length) throw new BadRequestException('Danh sách hàng nhập rỗng');
+  async createReceipt(dto: {
+    khoId: number;
+    ghiChu?: string;
+    items: Array<{
+      sanPhamId: number;
+      soLuong: string;
+      donGia?: string;
+      soLo?: string;
+      hanSuDung?: string;
+      soSerial?: string;
+    }>;
+  }) {
+    if (!dto.items?.length)
+      throw new BadRequestException('Danh sách hàng nhập rỗng');
 
     return this.prisma.$transaction(async (tx) => {
       const soPhieu = this.generateSoPhieu();
@@ -29,15 +45,17 @@ export class ReceiptsService {
         },
       });
 
-      const chiTietData: Prisma.ChiTietNhapKhoCreateManyInput[] = dto.items.map((i) => ({
-        phieuId: header.id,
-        sanPhamId: i.sanPhamId,
-        soLuong: new Prisma.Decimal(i.soLuong),
-        donGia: i.donGia ? new Prisma.Decimal(i.donGia) : undefined,
-        soLo: i.soLo,
-        hanSuDung: i.hanSuDung ? new Date(i.hanSuDung) : undefined,
-        soSerial: i.soSerial,
-      }));
+      const chiTietData: Prisma.ChiTietNhapKhoCreateManyInput[] = dto.items.map(
+        (i) => ({
+          phieuId: header.id,
+          sanPhamId: i.sanPhamId,
+          soLuong: new Prisma.Decimal(i.soLuong),
+          donGia: i.donGia ? new Prisma.Decimal(i.donGia) : undefined,
+          soLo: i.soLo,
+          hanSuDung: i.hanSuDung ? new Date(i.hanSuDung) : undefined,
+          soSerial: i.soSerial,
+        }),
+      );
 
       await tx.chiTietNhapKho.createMany({ data: chiTietData });
 
@@ -67,7 +85,10 @@ export class ReceiptsService {
 
   async validateReceipt(id: number) {
     return this.prisma.$transaction(async (tx) => {
-      const header = await tx.phieuNhapKho.findUnique({ where: { id }, include: { chiTiet: true } });
+      const header = await tx.phieuNhapKho.findUnique({
+        where: { id },
+        include: { chiTiet: true },
+      });
       if (!header) throw new NotFoundException('Không tìm thấy phiếu nhập');
       if (header.trangThai === TrangThaiNhapEnum.DONE) return header;
 
@@ -111,5 +132,3 @@ export class ReceiptsService {
     });
   }
 }
-
-

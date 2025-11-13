@@ -6,12 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-<<<<<<< HEAD
     "dev": "nest start --watch",
-=======
     "docs:app": "npx @compodoc/compodoc -p tsconfig.json -s -r 8078 -d .documentation/app --includes ./documents",
     "docs:prisma": "npx serve -l 8088 .documentation/prisma",
->>>>>>> main
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -70,12 +67,9 @@
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.4.0",
     "@prisma/client": "^6.19.0",
-<<<<<<< HEAD
-=======
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.1",
     "axios": "^1.13.2",
->>>>>>> main
     "bcrypt": "^6.0.0",
     "bullmq": "^5.63.0",
     "compression": "^1.8.1",

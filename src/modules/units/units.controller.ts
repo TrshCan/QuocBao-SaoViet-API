@@ -25,4 +25,3 @@ export class UnitsController {
     return this.unitsService.findOne(Number(id));
   }
 }
-

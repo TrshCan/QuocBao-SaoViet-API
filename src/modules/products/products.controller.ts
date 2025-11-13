@@ -31,4 +31,3 @@ export class ProductsController {
     return this.productsService.findOne(Number(id));
   }
 }
-

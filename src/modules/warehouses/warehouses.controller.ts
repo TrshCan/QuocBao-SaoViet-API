@@ -27,4 +27,3 @@ export class WarehousesController {
     return this.warehousesService.findOne(Number(id));
   }
 }
-

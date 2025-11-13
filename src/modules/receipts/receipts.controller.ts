@@ -40,5 +40,3 @@ export class ReceiptsController {
     return this.receiptsService.getReceiptById(Number(id));
   }
 }
-
-

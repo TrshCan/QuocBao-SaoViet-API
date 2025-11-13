@@ -1,8 +1,0 @@
-// Chức năng (module/tính năng hệ thống)
-model ChucNang {
-  id          String  @id @default(uuid(7))
-  tenChucNang String
-  description String? @db.VarChar(255)
-
-  phanQuyens PhanQuyen[]
-}

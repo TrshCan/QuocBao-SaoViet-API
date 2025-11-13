@@ -168,7 +168,7 @@ export class KeyTokenService {
     }
   }
 
-  async requireKeyStore(userId: string) {
+  async requireKeyStore(userId: string): Promise<KeyStoreForJWT> {
     const cacheKey = `${KEY_CACHE.KEY_STORE}:${userId}`;
     try {
       // Try to get from Redis cache first
@@ -211,8 +211,8 @@ export class KeyTokenService {
   }
 
   async findOneById() {}
-  async findByUserId(userId: string) {
-    return await this.keyTokenRepository.findOneByUserId(userId, {
+  async findByUserId(userId: string): Promise<KeyStoreForJWT | null> {
+    return (await this.keyTokenRepository.findOneByUserId(userId, {
       select: {
         id: true,
         privateKey: true,
@@ -220,7 +220,7 @@ export class KeyTokenService {
         refreshToken: true,
         refreshTokenUsed: true,
       },
-    });
+    })) as KeyStoreForJWT | null;
   }
   async findByRefreshTokenUsed() {}
   async findByRefreshToken() {}
@@ -251,7 +251,7 @@ export class KeyTokenService {
    */
   async updateKeyStoreCache(keyStore: KeyToken): Promise<void> {
     try {
-      const cacheKey = `keyStore:${keyStore.userId}`;
+      const cacheKey = `keyStore:${(keyStore as { userId: string }).userId}`;
       await this.redisService.set(
         cacheKey,
         JSON.stringify(keyStore),

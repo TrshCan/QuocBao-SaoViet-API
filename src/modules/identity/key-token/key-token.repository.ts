@@ -14,10 +14,10 @@ export class KeyTokenRepository {
       select?: T;
     },
   ): Promise<Prisma.KeyTokenGetPayload<{ select: T }> | null> {
-    const buildQuery = (await this.prisma.keyToken.findFirst({
+    const buildQuery = await this.prisma.keyToken.findFirst({
       where: { id },
       ...options,
-    })) as Prisma.KeyTokenGetPayload<{ select: T }> | null;
+    });
     return buildQuery;
   }
 
@@ -29,10 +29,10 @@ export class KeyTokenRepository {
       select?: T;
     },
   ): Promise<Prisma.KeyTokenGetPayload<{ select: T }> | null> {
-    const buildQuery = (await this.prisma.keyToken.findFirst({
+    const buildQuery = await this.prisma.keyToken.findFirst({
       where: { userId },
       ...options,
-    })) as Prisma.KeyTokenGetPayload<{ select: T }> | null;
+    });
     return buildQuery;
   }
 

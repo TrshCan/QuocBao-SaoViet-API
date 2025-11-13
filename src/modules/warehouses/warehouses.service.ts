@@ -6,7 +6,12 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 export class WarehousesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: { maKho: string; tenKho: string; diaChi?: string; dienTich?: string }) {
+  async create(dto: {
+    maKho: string;
+    tenKho: string;
+    diaChi?: string;
+    dienTich?: string;
+  }) {
     return this.prisma.kho.create({
       data: {
         maKho: dto.maKho,
@@ -32,4 +37,3 @@ export class WarehousesService {
     return found;
   }
 }
-
