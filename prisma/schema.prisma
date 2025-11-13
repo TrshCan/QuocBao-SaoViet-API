@@ -148,12 +148,19 @@ model TrangThaiXuat {
   ten  String
 }
 
+// Trạng thái nhập kho
+enum TrangThaiNhapEnum {
+  DRAFT
+  DONE
+}
+
 // Phiếu nhập kho (Inbound)
 model PhieuNhapKho {
   id          Int       @id @default(autoincrement())
   soPhieu     String    @unique
   khoId       Int
   ngayNhap    DateTime  @default(now())
+  trangThai   TrangThaiNhapEnum @default(DRAFT)
   ghiChu      String?   @db.VarChar(255)
 
   createdAt   DateTime  @default(now())
