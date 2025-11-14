@@ -73,6 +73,10 @@ yarn docs:app
 2. Typedoc - Prisma Client
 
 ```bash
+npm i serve -g
+```
+
+```bash
 yarn docs:prisma
 ```
 
