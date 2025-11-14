@@ -69,7 +69,7 @@ describe('Auth Http Service Unit Test', () => {
     const response = await authHttpService.login('test', 'test');
     expect(response).toBeDefined();
 
-    const responseData = response.data as ResponseController<LoginResponse>;
+    const responseData = response.data;
     expect(responseData.metadata.accessToken).toBe('test-access-token');
     expect(responseData.metadata.refreshToken).toBe('test-refresh-token');
     expect(responseData.metadata.user.username).toBe('test');

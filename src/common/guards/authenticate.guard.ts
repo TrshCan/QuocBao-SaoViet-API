@@ -54,7 +54,7 @@ export class JwtAuthenticateGuard implements CanActivate {
 
       const decodedUser = this.keyTokenService.verifyJWT(
         accessToken,
-        keyStore.publicKey as string,
+        keyStore.publicKey,
       ) as AccessTokenPayload;
 
       validateUserId(userId, decodedUser.id);

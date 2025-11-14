@@ -108,7 +108,7 @@ export class AppBootstrap {
       return document;
     };
 
-    SwaggerModule.setup('api', this.app, documentFactory);
+    SwaggerModule.setup('api-docs', this.app, documentFactory);
   }
 
   private initializePrisma() {

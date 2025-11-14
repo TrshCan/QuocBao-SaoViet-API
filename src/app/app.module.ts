@@ -12,8 +12,12 @@ import { envConfig, uploadDir } from '@/configs';
 import { envConfigSchema } from '@/common/validations/env-config';
 import { KEY_THROTTLER } from '@/common/constants';
 
-import { AuthModule } from '@/modules/identity';
 import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
+import { AuthModule } from '@/modules/identity';
+import { ReceiptsModule } from '@/modules/receipts';
+import { WarehousesModule } from '@/modules/warehouses';
+import { UnitsModule } from '@/modules/units';
+import { ProductsModule } from '@/modules/products';
 
 @Module({
   imports: [
@@ -54,6 +58,10 @@ import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
     IoredisModule,
     HealthModule,
     AuthModule,
+    ReceiptsModule,
+    WarehousesModule,
+    UnitsModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [

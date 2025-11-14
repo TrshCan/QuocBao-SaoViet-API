@@ -38,7 +38,7 @@ export class JwtRefreshAuthenticateGuard implements CanActivate {
         await this.keyTokenService.requireKeyStore(userId);
       const decodedUser = this.keyTokenService.verifyJWT(
         refreshToken,
-        keyStore.privateKey as string,
+        keyStore.privateKey,
       ) as RefreshTokenPayload;
       validateUserId(userId, decodedUser.id);
 
