@@ -8,3 +8,4 @@ export * from './config-permission';
 export * from './config-role';
 export * from './config-upload-dir';
 export * from './config-swagger';
+export * from './config-http-module';

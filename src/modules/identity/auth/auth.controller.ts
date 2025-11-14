@@ -25,8 +25,9 @@ import { KEY_THROTTLER } from '@/common/constants';
 import { AuthService } from './auth.service';
 import { authLoginSchema } from './validations';
 
-import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { ResponseController } from '@/types/response-controller';
+import type { AuthLoginDto } from './dto/auth-login.dto';
+import type { LoginResponse } from './interfaces';
 import { type FoundCurrentUser, UserService } from '../user';
 
 @Controller('auth')
@@ -63,7 +64,7 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe({ body: authLoginSchema }))
   async login(
     @Body() body: AuthLoginDto,
-  ): Promise<ResponseController<unknown>> {
+  ): Promise<ResponseController<LoginResponse>> {
     const result = await this.authService.login(body);
 
     return {

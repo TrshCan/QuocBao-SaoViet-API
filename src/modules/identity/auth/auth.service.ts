@@ -18,7 +18,9 @@ import { IoredisService } from '../../shared/ioredis';
 import { getInfoData } from '@/utils';
 
 import { Prisma } from '@generated/prisma';
+
 import type { AuthLoginDto } from './dto/auth-login.dto';
+import type { LoginResponse } from './interfaces/login';
 import type { EnvConfig } from '@/configs';
 import type { AccessTokenPayload } from '@/types/jwt';
 
@@ -34,7 +36,7 @@ export class AuthService {
     private readonly redisService: IoredisService,
   ) {}
 
-  async login(body: AuthLoginDto) {
+  async login(body: AuthLoginDto): Promise<LoginResponse> {
     const tempRefreshTokenSecret =
       this.configService.get<string>('TEMP_REFRESH_TOKEN_SECRET') ??
       crypto.randomBytes(32).toString('hex');
@@ -132,7 +134,7 @@ export class AuthService {
     );
 
     const userData = getInfoData<
-      FoundUserLogin,
+      Omit<FoundUserLogin, 'password' | 'secretOtp' | 'status'>,
       'id' | 'username' | 'email' | 'fullName' | 'role' | 'permissions'
     >({
       fields: ['id', 'username', 'email', 'fullName', 'role', 'permissions'],
@@ -294,7 +296,7 @@ export class AuthService {
   }
 }
 
-type FoundUserLogin = Pick<
+export type FoundUserLogin = Pick<
   Prisma.UserGetPayload<{
     select: {
       id: true;
