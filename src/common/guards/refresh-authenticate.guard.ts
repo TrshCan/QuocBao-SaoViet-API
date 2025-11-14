@@ -12,7 +12,7 @@ import type { Request } from 'express';
 import { KeyTokenService } from '@/modules/identity/key-token';
 import { CLIENT_ID, REFRESH_TOKEN } from '../constants';
 import { requireHeader, setRefreshUser, validateUserId } from '@/utils';
-import { RefreshTokenPayload } from '@/types/jwt';
+import { RefreshTokenPayload, KeyStoreForJWT } from '@/types/jwt';
 
 @Injectable()
 export class JwtRefreshAuthenticateGuard implements CanActivate {
@@ -34,10 +34,11 @@ export class JwtRefreshAuthenticateGuard implements CanActivate {
         throw new UnauthorizedException('User ID is required!');
       }
 
-      const keyStore = await this.keyTokenService.requireKeyStore(userId);
+      const keyStore: KeyStoreForJWT =
+        await this.keyTokenService.requireKeyStore(userId);
       const decodedUser = this.keyTokenService.verifyJWT(
         refreshToken,
-        keyStore.privateKey,
+        keyStore.privateKey as string,
       ) as RefreshTokenPayload;
       validateUserId(userId, decodedUser.id);
 

@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "dev": "nest start --watch",
     "docs:app": "npx @compodoc/compodoc -p tsconfig.json -s -r 8078 -d .documentation/app --includes ./documents",
     "docs:prisma": "npx serve -l 8088 .documentation/prisma",
     "build": "nest build",
@@ -114,7 +115,9 @@
     "@types/supertest": "^6.0.2",
     "@types/ua-parser-js": "^0.7.39",
     "@types/uuid": "^11.0.0",
-    "eslint": "^9.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",

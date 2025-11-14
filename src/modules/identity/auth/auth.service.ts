@@ -195,15 +195,24 @@ export class AuthService {
     email: string;
     refreshToken: string;
   }) {
-    const keyStoreData = await this.keyTokenRepository.findOneById(keyStoreId, {
-      select: {
-        id: true,
-        refreshToken: true,
-        refreshTokenUsed: true,
-        publicKey: true,
-        privateKey: true,
+    const keyStoreData = (await this.keyTokenRepository.findOneById(
+      keyStoreId,
+      {
+        select: {
+          id: true,
+          refreshToken: true,
+          refreshTokenUsed: true,
+          publicKey: true,
+          privateKey: true,
+        },
       },
-    });
+    )) as {
+      id: string;
+      refreshToken: string;
+      refreshTokenUsed: string[];
+      publicKey: string;
+      privateKey: string;
+    } | null;
 
     if (!keyStoreData) {
       throw new NotFoundException('Key store not found');
@@ -267,14 +276,14 @@ export class AuthService {
       keyStorePrivateKey,
     );
 
-    const getKeyStore = await this.keyTokenRepository.findOneById(
+    const getKeyStore = (await this.keyTokenRepository.findOneById(
       currentKeyStoreId,
       {
         select: {
           id: true,
         },
       },
-    );
+    )) as { id: string } | null;
     if (!getKeyStore) {
       throw new NotFoundException('Key store not found');
     }
