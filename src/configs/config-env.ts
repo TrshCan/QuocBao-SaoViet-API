@@ -8,6 +8,8 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   // Environment (development, production, test)
   NODE_ENV: process.env.NODE_ENV || 'development',
 
+  API_BASE_URL: process.env.API_BASE_URL,
+
   // Port
   PORT: process.env.PORT,
 

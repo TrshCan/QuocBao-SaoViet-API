@@ -5,6 +5,8 @@ export const envConfigSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
+  // API Base URL
+  API_BASE_URL: z.string(),
   // Port
   PORT: z.coerce.number().int().positive().default(3000),
   // CORS
