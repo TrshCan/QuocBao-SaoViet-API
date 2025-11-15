@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { PrismaService } from '@/modules/shared/prisma';
 import { Prisma } from '@generated/prisma';
+import { PrismaService } from '@/modules/shared/prisma';
 import { DefaultArgs } from '@generated/prisma/runtime/library';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class KeyTokenRepository {
     options?: {
       select?: T;
     },
-  ): Promise<Prisma.KeyTokenGetPayload<{ select: T }> | null> {
+  ) {
     const buildQuery = await this.prisma.keyToken.findFirst({
       where: { id },
       ...options,
@@ -28,7 +28,7 @@ export class KeyTokenRepository {
     options?: {
       select?: T;
     },
-  ): Promise<Prisma.KeyTokenGetPayload<{ select: T }> | null> {
+  ) {
     const buildQuery = await this.prisma.keyToken.findFirst({
       where: { userId },
       ...options,

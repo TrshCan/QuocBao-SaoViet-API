@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import { PrismaService } from '../shared/prisma';
 
 @Injectable()
 export class ProductsService {
@@ -10,7 +10,7 @@ export class ProductsService {
     tenSanPham: string;
     nhom?: string;
     moTa?: string;
-    donViTinhId: number;
+    donViTinhId: string;
     quanLyLo?: boolean;
     quanLyHSD?: boolean;
     quanLySerial?: boolean;
@@ -38,7 +38,7 @@ export class ProductsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const found = await this.prisma.sanPham.findFirst({
       where: { id, isDelete: false },
       include: { donViTinh: true },

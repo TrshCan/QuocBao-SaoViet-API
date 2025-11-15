@@ -6,7 +6,7 @@ type CreateProductDto = {
   tenSanPham: string;
   nhom?: string;
   moTa?: string;
-  donViTinhId: number;
+  donViTinhId: string;
   quanLyLo?: boolean;
   quanLyHSD?: boolean;
   quanLySerial?: boolean;
@@ -28,6 +28,6 @@ export class ProductsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.productsService.findOne(Number(id));
+    return this.productsService.findOne(id);
   }
 }

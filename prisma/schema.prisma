@@ -28,6 +28,11 @@ enum UserStatus {
   suspended
 }
 
+enum TrangThaiNhap {
+  DRAFT
+  DONE
+}
+
 // Nhóm trường audit chuẩn (theo quy ước)
 // - createdAt/updatedAt: mốc thời gian tạo/cập nhật
 // - createdBy/updatedBy: người tạo/cập nhật (tham chiếu User.id – có thể để trống giai đoạn đầu)
@@ -191,6 +196,7 @@ model PhieuNhapKho {
   khoId    String
   ngayNhap DateTime @default(now())
   ghiChu   String?  @db.VarChar(255)
+  trangThai TrangThaiNhap @default(DRAFT)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

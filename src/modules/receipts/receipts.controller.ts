@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
 
 type CreateReceiptItemDto = {
-  sanPhamId: number;
+  sanPhamId: string;
   soLuong: string;
   donGia?: string;
   soLo?: string;
@@ -11,7 +11,7 @@ type CreateReceiptItemDto = {
 };
 
 type CreateReceiptDto = {
-  khoId: number;
+  khoId: string;
   ghiChu?: string;
   items: CreateReceiptItemDto[];
 };
@@ -32,11 +32,11 @@ export class ReceiptsController {
 
   @Put('validate/:id')
   async validate(@Param('id') id: string) {
-    return this.receiptsService.validateReceipt(Number(id));
+    return this.receiptsService.validateReceipt(id);
   }
 
   @Get(':id')
   async getById(@Param('id') id: string) {
-    return this.receiptsService.getReceiptById(Number(id));
+    return this.receiptsService.getReceiptById(id);
   }
 }

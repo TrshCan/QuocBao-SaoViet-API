@@ -22,6 +22,6 @@ export class UnitsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.unitsService.findOne(Number(id));
+    return this.unitsService.findOne(id);
   }
 }

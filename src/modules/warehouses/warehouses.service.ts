@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import { Decimal } from '@prisma/client/runtime/library';
+
+import { PrismaService } from '../shared/prisma';
 
 @Injectable()
 export class WarehousesService {
@@ -17,7 +18,10 @@ export class WarehousesService {
         maKho: dto.maKho,
         tenKho: dto.tenKho,
         diaChi: dto.diaChi,
-        dienTich: dto.dienTich ? new Prisma.Decimal(dto.dienTich) : undefined,
+        dienTich:
+          dto.dienTich && !isNaN(Number(dto.dienTich))
+            ? new Decimal(dto.dienTich)
+            : undefined,
       },
     });
   }
@@ -29,7 +33,7 @@ export class WarehousesService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const found = await this.prisma.kho.findFirst({
       where: { id, isDelete: false },
     });

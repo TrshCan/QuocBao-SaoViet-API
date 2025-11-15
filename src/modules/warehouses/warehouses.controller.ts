@@ -24,6 +24,6 @@ export class WarehousesController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.warehousesService.findOne(Number(id));
+    return this.warehousesService.findOne(id);
   }
 }

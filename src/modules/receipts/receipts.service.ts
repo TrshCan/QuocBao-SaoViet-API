@@ -3,8 +3,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, TrangThaiNhapEnum } from '@prisma/client';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import { PrismaService } from '../shared/prisma';
+import { Prisma } from '@generated/prisma';
+import { TrangThaiNhapEnum } from '@/common/enums/status';
 
 @Injectable()
 export class ReceiptsService {
@@ -20,10 +21,10 @@ export class ReceiptsService {
   }
 
   async createReceipt(dto: {
-    khoId: number;
+    khoId: string;
     ghiChu?: string;
     items: Array<{
-      sanPhamId: number;
+      sanPhamId: string;
       soLuong: string;
       donGia?: string;
       soLo?: string;
@@ -41,7 +42,8 @@ export class ReceiptsService {
           soPhieu,
           khoId: dto.khoId,
           ghiChu: dto.ghiChu,
-          trangThai: TrangThaiNhapEnum.DRAFT,
+          // Default value is DRAFT, we don't need to set it
+          // trangThai: Prisma.TrangThaiNhapEnum.DRAFT,
         },
       });
 
@@ -74,7 +76,7 @@ export class ReceiptsService {
     });
   }
 
-  async getReceiptById(id: number) {
+  async getReceiptById(id: string) {
     const found = await this.prisma.phieuNhapKho.findUnique({
       where: { id },
       include: { chiTiet: { include: { sanPham: true } }, kho: true },
@@ -83,7 +85,7 @@ export class ReceiptsService {
     return found;
   }
 
-  async validateReceipt(id: number) {
+  async validateReceipt(id: string) {
     return this.prisma.$transaction(async (tx) => {
       const header = await tx.phieuNhapKho.findUnique({
         where: { id },

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import { PrismaService } from '../shared/prisma';
 
 @Injectable()
 export class UnitsService {
@@ -21,7 +21,7 @@ export class UnitsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const found = await this.prisma.donViTinh.findFirst({
       where: { id, isDelete: false },
     });

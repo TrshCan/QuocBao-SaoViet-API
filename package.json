@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "nest start --watch",
     "docs:app": "npx @compodoc/compodoc -p tsconfig.json -s -r 8078 -d .documentation/app --includes ./documents",
     "docs:prisma": "npx serve -l 8088 .documentation/prisma",
     "build": "nest build",
