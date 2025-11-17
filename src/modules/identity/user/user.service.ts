@@ -26,8 +26,8 @@ export class UserService {
             fullName: true,
             phone: true,
             role: true,
-            permissions: true,
             status: true,
+            // permissions: true,
           },
         });
 
@@ -52,16 +52,10 @@ export type FoundCurrentUser = Pick<
       fullName: true;
       phone: true;
       role: true;
-      permissions: true;
       status: true;
+      // permissions: true,
     };
   }>,
-  | 'id'
-  | 'username'
-  | 'email'
-  | 'fullName'
-  | 'phone'
-  | 'role'
-  | 'permissions'
-  | 'status'
+  'id' | 'username' | 'email' | 'fullName' | 'phone' | 'role' | 'status'
+  // | 'permissions'
 >;

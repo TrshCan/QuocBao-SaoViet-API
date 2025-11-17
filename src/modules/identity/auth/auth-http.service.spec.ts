@@ -44,7 +44,7 @@ describe('Auth Http Service Unit Test', () => {
         email: 'test@example.com',
         fullName: 'Test User',
         role: 'super_admin',
-        permissions: [] as unknown as FoundUserLogin['permissions'],
+        // permissions: [], as unknown as FoundUserLogin['permissions']
       };
 
     const mockLoginResponse: ResponseController<LoginResponse> = {

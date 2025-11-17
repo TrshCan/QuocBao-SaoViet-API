@@ -36,7 +36,7 @@ export class JwtAuthenticateGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
 
     try {
-      const userId = requireHeader(request, CLIENT_ID.toString());
+      const userId = requireHeader(request, CLIENT_ID);
       const authHeader = requireHeader(request, AUTHORIZATION.toString());
       const accessToken = handleBearerToken(authHeader);
       // Check token in blacklist

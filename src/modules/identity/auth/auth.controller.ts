@@ -79,7 +79,7 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthenticateGuard)
   async logout(
     @Req() request: Request,
-    @Headers(AUTHORIZATION.toString()) accessToken: string,
+    @Headers(AUTHORIZATION) accessToken: string,
   ): Promise<ResponseController<unknown>> {
     const { id: userId, keyStoreId } = request.refresh;
     if (!userId || !keyStoreId || !accessToken) {
@@ -104,7 +104,7 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthenticateGuard)
   async handleRefreshToken(
     @Req() request: Request,
-    @Headers(REFRESH_TOKEN.toString()) refreshToken: string,
+    @Headers(REFRESH_TOKEN) refreshToken: string,
   ): Promise<ResponseController<unknown>> {
     const mergeRequest = {
       keyStoreId: request.refresh.keyStoreId,

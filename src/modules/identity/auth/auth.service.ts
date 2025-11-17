@@ -54,7 +54,7 @@ export class AuthService {
           password: true,
           secretOtp: true,
           status: true,
-          permissions: true,
+          // permissions: true,
           role: true,
         },
       });
@@ -135,9 +135,10 @@ export class AuthService {
 
     const userData = getInfoData<
       Omit<FoundUserLogin, 'password' | 'secretOtp' | 'status'>,
-      'id' | 'username' | 'email' | 'fullName' | 'role' | 'permissions'
+      'id' | 'username' | 'email' | 'fullName' | 'role'
     >({
-      fields: ['id', 'username', 'email', 'fullName', 'role', 'permissions'],
+      fields: ['id', 'username', 'email', 'fullName', 'role'],
+      // fields: ['id', 'username', 'email', 'fullName', 'role', 'permissions'],
       object: foundUser,
     });
 
@@ -245,7 +246,7 @@ export class AuthService {
         username: true,
         fullName: true,
         role: true,
-        permissions: true,
+        // permissions: true,
         status: true,
       },
     });
@@ -314,7 +315,7 @@ export type FoundUserLogin = Pick<
       email: true;
       password: true;
       role: true;
-      permissions: true;
+      // permissions: true,
       secretOtp: true;
       status: true;
     };
@@ -325,7 +326,7 @@ export type FoundUserLogin = Pick<
   | 'email'
   | 'password'
   | 'role'
-  | 'permissions'
+  // | 'permissions'
   | 'secretOtp'
   | 'status'
 >;
