@@ -38,15 +38,4 @@ export default defineConfig(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
-  {
-    files: ['src/modules/identity/key-token/**/*.ts', 'src/modules/identity/auth/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-redundant-type-constituents': 'off',
-    },
-  },
 );
