@@ -5,7 +5,6 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 import { KeyTokenModule } from '@/modules/identity/key-token';
-import { PrismaModule } from '@/modules/shared/prisma';
 import { OtpModule } from '@/modules/identity/otp';
 import { IoredisModule } from '@/modules/shared/ioredis';
 import { UserModule } from '@/modules/identity/user';
@@ -15,7 +14,6 @@ import { httpModuleConfig } from '@/configs';
     HttpModule.register(httpModuleConfig),
     KeyTokenModule,
     UserModule,
-    PrismaModule,
     OtpModule,
     IoredisModule,
   ],

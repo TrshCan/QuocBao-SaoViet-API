@@ -22,7 +22,6 @@ import {
 import { GlobalExceptionFilter } from '@/common/filters';
 import { ResponseTransformInterceptor } from '@/common/interceptors';
 
-import { PrismaService } from '@/modules/shared/prisma';
 import { AppModule } from '@/app';
 import { loadOpenApiYaml, mergeOpenApiDocument } from '../documentation';
 
@@ -40,7 +39,6 @@ export class AppBootstrap {
     this.initializeUploads();
     this.initializeGlobalFilters();
     this.initializeGlobalInterceptors();
-    this.initializePrisma();
     this.setGlobalPrefix();
     this.initializeOpenapi();
     await this.handleUploadDirectories();
@@ -109,10 +107,6 @@ export class AppBootstrap {
     };
 
     SwaggerModule.setup('api-docs', this.app, documentFactory);
-  }
-
-  private initializePrisma() {
-    this.app.get(PrismaService).onApplicationBootstrap();
   }
 
   private setGlobalPrefix() {

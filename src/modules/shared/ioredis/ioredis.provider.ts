@@ -55,11 +55,6 @@ export const ioredisProvider: Provider = {
     const port = configService.get<number>('REDIS_PORT') || 6379;
     const node_env =
       configService.get<EnvConfig['NODE_ENV']>('NODE_ENV') || 'development';
-    console.log('ioredis connect:', {
-      host,
-      port,
-      node_env,
-    });
 
     const options = redisOptions({ host, port, node_env });
     const client = new Redis(options);
@@ -68,8 +63,6 @@ export const ioredisProvider: Provider = {
     client.on('error', function (e) {
       console.error(`REDIS: Error connecting: "${e}"`);
     });
-
-    await client.ping().then((v) => console.log('REDIS OK =>', v));
 
     try {
       await client?.connect?.();
