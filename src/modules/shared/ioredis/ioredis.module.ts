@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 
@@ -7,10 +7,9 @@ import { ioredisProvider } from './ioredis.provider';
 import { REDIS_CLIENT } from './ioredis.constants';
 import { IoredisHealthIndicator } from './ioredis.health';
 
-@Global()
 @Module({
   imports: [ConfigModule, TerminusModule],
-  providers: [IoredisService, ioredisProvider, IoredisHealthIndicator],
-  exports: [IoredisService, REDIS_CLIENT, IoredisHealthIndicator],
+  providers: [ioredisProvider, IoredisService, IoredisHealthIndicator],
+  exports: [REDIS_CLIENT, IoredisService, IoredisHealthIndicator],
 })
 export class IoredisModule {}
