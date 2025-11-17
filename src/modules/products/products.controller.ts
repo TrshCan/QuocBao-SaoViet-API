@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { ResponseController } from '@/types/response-controller';
 
 type CreateProductDto = {
   maSanPham: string;
@@ -17,7 +18,9 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  async create(@Body() dto: CreateProductDto) {
+  async create(
+    @Body() dto: CreateProductDto,
+  ): Promise<ResponseController<unknown>> {
     const result = await this.productsService.create(dto);
     return {
       message: 'Sản phẩm đã được tạo thành công',
@@ -26,12 +29,20 @@ export class ProductsController {
   }
 
   @Get()
-  async findAll() {
-    return this.productsService.findAll();
+  async findAll(): Promise<ResponseController<unknown>> {
+    const result = await this.productsService.findAll();
+    return {
+      message: 'Danh sách sản phẩm đã được lấy thành công',
+      metadata: result,
+    };
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<ResponseController<unknown>> {
+    const result = await this.productsService.findOne(id);
+    return {
+      message: 'Sản phẩm đã được lấy thành công',
+      metadata: result,
+    };
   }
 }
