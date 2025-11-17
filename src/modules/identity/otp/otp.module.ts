@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 
 import { OtpService } from './otp.service';
-import { IoredisModule } from '@/modules/shared/ioredis/ioredis.module';
 
 @Module({
-  imports: [IoredisModule],
+  imports: [],
   providers: [OtpService],
   exports: [OtpService],
 })

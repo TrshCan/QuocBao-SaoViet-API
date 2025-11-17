@@ -2438,13 +2438,6 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
 
-"@nestjs-modules/ioredis@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@nestjs-modules/ioredis/-/ioredis-2.0.2.tgz"
-  integrity sha512-8pzSvT8R3XP6p8ZzQmEN8OnY0yWrJ/elFhwQK+PID2zf1SLBkAZ18bDcx3SKQ2atledt0gd9kBeP5xT4MlyS7Q==
-  optionalDependencies:
-    "@nestjs/terminus" "10.2.0"
-
 "@nestjs-modules/mailer@^2.0.2":
   version "2.0.2"
   resolved "https://registry.npmjs.org/@nestjs-modules/mailer/-/mailer-2.0.2.tgz"
@@ -2598,14 +2591,6 @@
     lodash "4.17.21"
     path-to-regexp "8.3.0"
     swagger-ui-dist "5.29.4"
-
-"@nestjs/terminus@10.2.0":
-  version "10.2.0"
-  resolved "https://registry.npmjs.org/@nestjs/terminus/-/terminus-10.2.0.tgz"
-  integrity sha512-zPs98xvJ4ogEimRQOz8eU90mb7z+W/kd/mL4peOgrJ/VqER+ibN2Cboj65uJZW3XuNhpOqaeYOJte86InJd44A==
-  dependencies:
-    boxen "5.1.2"
-    check-disk-space "3.4.0"
 
 "@nestjs/terminus@^11.0.0":
   version "11.0.0"

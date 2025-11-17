@@ -18,7 +18,11 @@ export class ProductsController {
 
   @Post()
   async create(@Body() dto: CreateProductDto) {
-    return this.productsService.create(dto);
+    const result = await this.productsService.create(dto);
+    return {
+      message: 'Sản phẩm đã được tạo thành công',
+      metadata: result,
+    };
   }
 
   @Get()

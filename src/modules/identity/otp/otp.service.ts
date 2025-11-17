@@ -1,12 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { totp } from 'otplib';
 
-import { IoredisService } from '@/modules/shared/ioredis/ioredis.service';
-
 @Injectable()
 export class OtpService {
-  constructor(private readonly ioredisService: IoredisService) {}
-
   generateOtp(secret: string) {
     totp.options = {
       step: 5 * 60, // 5 minutes

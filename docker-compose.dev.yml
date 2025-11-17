@@ -22,16 +22,20 @@ services:
 
   # Redis for development  
   redis:
-    image: redis:8-alpine
-    container_name: saoviet-redis-dev
+    image: redis:7-alpine
+    container_name: saoviet_redis_dev
     restart: unless-stopped
-    # command: ["redis-server", "--requirepass", "redis123"]
+    # command: >
+    #   redis-server
+    #   --appendonly yes
+    #   --maxmemory 256mb
+    #   --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
     volumes:
       - redis_dev_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "PING"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -55,7 +59,7 @@ services:
 volumes:
   postgres_dev_data:
     driver: local
-  redis_dev_data:
-    driver: local
   pgadmin_dev_data:
+    driver: local
+  redis_dev_data:
     driver: local

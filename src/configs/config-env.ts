@@ -35,6 +35,7 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   // Database (Redis - for future use)
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: process.env.REDIS_PORT,
+  REDIS_USERNAME: process.env.REDIS_USERNAME,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_DB: process.env.REDIS_DB,
 });
