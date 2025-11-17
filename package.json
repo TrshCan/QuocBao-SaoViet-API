@@ -33,8 +33,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:seed": "ts-node -r tsconfig-paths/register prisma/seed/seed.ts",
     "dev:local": "npm run dev:services && npm run db:generate && npm run dev",
-    "dev:setup": "npm run dev:services && npm run db:generate && npm run db:seed && npm run db:seed:admin",
+    "dev:setup": "npm run dev:services && npm run db:generate && npm run db:seed",
     "dev:services": "docker compose -f docker-compose.dev.yml up -d",
     "dev:services:down": "docker compose -f docker-compose.dev.yml down -v",
     "dev:services:up": "docker compose -f docker-compose.dev.yml up -d",
@@ -158,5 +159,8 @@
   },
   "engines": {
     "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
+  },
+  "prisma": {
+    "seed": "ts-node -r tsconfig-paths/register prisma/seed/seed.ts"
   }
 }
