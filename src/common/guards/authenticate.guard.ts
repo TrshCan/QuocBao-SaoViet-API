@@ -37,7 +37,7 @@ export class JwtAuthenticateGuard implements CanActivate {
 
     try {
       const userId = requireHeader(request, CLIENT_ID);
-      const authHeader = requireHeader(request, AUTHORIZATION.toString());
+      const authHeader = requireHeader(request, AUTHORIZATION);
       const accessToken = handleBearerToken(authHeader);
       // Check token in blacklist
       const blacklist = await this.redisService.existsOne(
