@@ -114,6 +114,8 @@ export class AuthController {
       userId: request.refresh.id,
       email: request.refresh.email,
       refreshToken,
+      userAgent: request.headers['user-agent'] || 'unknown',
+      ipAddress: request.ip || '0.0.0.0',
     };
 
     const result = await this.authService.handleRefreshToken(mergeRequest);
