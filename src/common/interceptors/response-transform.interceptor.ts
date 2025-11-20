@@ -26,7 +26,7 @@ export class ResponseTransformInterceptor<T>
           .getResponse<ResponseTransform<T>>().statusCode;
         return {
           success: true,
-          statusCode: getStatusCode,
+          statusCode: getStatusCode || 200,
           message: data.message,
           data: data.metadata,
           timestamp: new Date().toISOString(),

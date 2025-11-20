@@ -5,4 +5,5 @@ export const KEY_CACHE = {
   OTP_LOCK: 'otp:lock',
   TEMP_USER_DATA: 'temp:user',
   BLACKLIST: 'blacklist',
+  RESET_PASSWORD_TOKEN: 'reset-password-token',
 };

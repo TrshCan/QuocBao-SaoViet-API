@@ -9,6 +9,14 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   NODE_ENV: process.env.NODE_ENV || 'development',
 
   API_BASE_URL: process.env.API_BASE_URL,
+  CLIENT_URL: process.env.CLIENT_URL,
+
+  // SMTP
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT,
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  SMTP_FROM: process.env.SMTP_FROM,
 
   // Port
   PORT: process.env.PORT,
@@ -18,7 +26,8 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
 
   // TEMPORARY JWT
   TEMP_REFRESH_TOKEN_SECRET: process.env.TEMP_REFRESH_TOKEN_SECRET,
-
+  TEMP_TOKEN_SECRET: process.env.TEMP_TOKEN_SECRET,
+  TEMP_TOKEN_EXPIRES_IN: process.env.TEMP_TOKEN_EXPIRES_IN,
   // Public key for creation JWT
   PUBLIC_KEY_TYPE: process.env.PUBLIC_KEY_TYPE,
 

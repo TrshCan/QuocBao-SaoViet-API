@@ -14,6 +14,8 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 import { ZodValidationPipe } from '@/common/pipes/validation.pipe';
 import { AUTHORIZATION, REFRESH_TOKEN } from '@/common/constants/headers';
 import {
@@ -23,18 +25,22 @@ import {
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { AuthService } from './auth.service';
-import { authLoginSchema } from './validations';
+import { authForgotPasswordSchema, authLoginSchema } from './validations';
+
+import { MailEvents } from '@/common/enums/mail.events';
 
 import type { ResponseController } from '@/types/response-controller';
-import type { AuthLoginDto } from './dto/auth-login.dto';
+import type { AuthLoginDto, AuthForgotPasswordDto } from './dto';
 import type { LoginResponse } from './interfaces';
 import { type FoundCurrentUser, UserService } from '../user';
+import { type ForgotPasswordEmailPayload } from '@/modules/mail';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Get('me')
@@ -83,7 +89,7 @@ export class AuthController {
   async logout(
     @Req() request: Request,
     @Headers(AUTHORIZATION) accessToken: string,
-  ): Promise<ResponseController<unknown>> {
+  ): Promise<ResponseController<boolean>> {
     const { id: userId, keyStoreId } = request.refresh;
     if (!userId || !keyStoreId || !accessToken) {
       throw new UnauthorizedException('Authentication required!');
@@ -123,6 +129,29 @@ export class AuthController {
     return {
       message: 'Refresh token successfully!',
       metadata: result,
+    };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @UsePipes(new ZodValidationPipe({ body: authForgotPasswordSchema }))
+  async forgotPassword(
+    @Body() body: AuthForgotPasswordDto,
+  ): Promise<ResponseController<{ email: string }>> {
+    const result = await this.authService.forgotPassword(body);
+
+    this.eventEmitter.emit(MailEvents.SEND_FORGOT_PASSWORD_EMAIL, {
+      to: result.email,
+      resetLink: result.resetLink,
+      userName: result.username,
+    } as ForgotPasswordEmailPayload);
+
+    return {
+      message: 'Successfully sent email to reset password!',
+      metadata: {
+        email: result.email,
+      },
     };
   }
 }

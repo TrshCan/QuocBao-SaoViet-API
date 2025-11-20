@@ -13,7 +13,6 @@ import crypto from 'node:crypto';
 
 import { KeyTokenRepository, KeyTokenService } from '../key-token';
 import { UserRepository } from '../user';
-import { IoredisService } from '../../shared/ioredis';
 
 import { getInfoData } from '@/utils';
 
@@ -22,7 +21,9 @@ import { Prisma } from '@generated/prisma';
 import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { LoginResponse } from './interfaces/login';
 import type { EnvConfig } from '@/configs';
-import type { AccessTokenPayload } from '@/types/jwt';
+import type { AccessTokenPayload, TempTokenPayload } from '@/types/jwt';
+import { AuthForgotPasswordDto } from './dto';
+import { KEY_CACHE } from '@/common/constants';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,6 @@ export class AuthService {
     private readonly keyTokenService: KeyTokenService,
     private readonly keyTokenRepository: KeyTokenRepository,
     private readonly userRepository: UserRepository,
-    private readonly redisService: IoredisService,
   ) {}
 
   async login(
@@ -206,9 +206,8 @@ export class AuthService {
     userAgent: string;
     ipAddress: string;
   }) {
-    const keyStoreData = (await this.keyTokenRepository.findOneById(
-      keyStoreId,
-      {
+    const keyStoreData: KeyStoreDataToRefreshToken | null =
+      await this.keyTokenRepository.findOneById(keyStoreId, {
         select: {
           id: true,
           refreshToken: true,
@@ -216,14 +215,7 @@ export class AuthService {
           publicKey: true,
           privateKey: true,
         },
-      },
-    )) as {
-      id: string;
-      refreshToken: string;
-      refreshTokenUsed: string[];
-      publicKey: string;
-      privateKey: string;
-    } | null;
+      });
 
     if (!keyStoreData) {
       throw new NotFoundException('Key store not found');
@@ -316,6 +308,50 @@ export class AuthService {
       iatRefreshToken: tokens.iat_refreshToken,
     };
   }
+
+  async forgotPassword({ username, email }: AuthForgotPasswordDto) {
+    const user = await this.userRepository.findOneByUsername(username, {
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    if (user.email !== email) {
+      throw new BadRequestException('Email is not correct!');
+    }
+
+    const payload: TempTokenPayload = {
+      uid: user.id,
+      email: user.email,
+      type: 'reset-password',
+    };
+
+    // Create temp token
+    const { tempToken, expiresIn } =
+      this.keyTokenService.createTempToken(payload);
+
+    await this.keyTokenService.saveTempTokenToRedis(
+      `${KEY_CACHE.RESET_PASSWORD_TOKEN}:${user.id}`,
+      tempToken,
+      expiresIn,
+    );
+
+    const clientUrl =
+      this.configService.get<EnvConfig['CLIENT_URL']>('CLIENT_URL') ??
+      'http://localhost:3091';
+
+    const resetLink = `${clientUrl}/auth/reset-password?token=${encodeURIComponent(tempToken)}&uid=${user.id}`;
+    // await this.mailService.sendPasswordResetEmail(user.email, resetLink);
+
+    return {
+      resetLink,
+      username: user.username,
+      email: user.email,
+    };
+  }
 }
 
 export type FoundUserLogin = Pick<
@@ -341,4 +377,17 @@ export type FoundUserLogin = Pick<
   // | 'permissions'
   | 'secretOtp'
   | 'status'
+>;
+
+export type KeyStoreDataToRefreshToken = Pick<
+  Prisma.KeyTokenGetPayload<{
+    select: {
+      id: true;
+      refreshToken: true;
+      refreshTokenUsed: true;
+      publicKey: true;
+      privateKey: true;
+    };
+  }>,
+  'id' | 'refreshToken' | 'refreshTokenUsed' | 'publicKey' | 'privateKey'
 >;

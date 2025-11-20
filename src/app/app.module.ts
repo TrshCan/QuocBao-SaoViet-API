@@ -2,6 +2,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard, seconds } from '@nestjs/throttler';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
@@ -14,6 +15,7 @@ import { KEY_THROTTLER } from '@/common/constants';
 
 import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
 import { AuthModule } from '@/modules/identity';
+import { MailModule } from '@/modules/mail';
 import { ReceiptsModule } from '@/modules/receipts';
 import { WarehousesModule } from '@/modules/warehouses';
 import { UnitsModule } from '@/modules/units';
@@ -54,9 +56,19 @@ import { ProductsModule } from '@/modules/products';
     MulterModule.register({
       dest: `../../${uploadDir[0]}`,
     }),
+    EventEmitterModule.forRoot({
+      wildcard: false,
+      delimiter: '.',
+      newListener: false,
+      removeListener: false,
+      maxListeners: 10,
+      verboseMemoryLeak: false,
+      ignoreErrors: false,
+    }),
     PrismaModule,
     IoredisModule,
     HealthModule,
+    MailModule,
     AuthModule,
     ReceiptsModule,
     WarehousesModule,

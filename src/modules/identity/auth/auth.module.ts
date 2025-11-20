@@ -9,6 +9,7 @@ import { OtpModule } from '@/modules/identity/otp';
 import { IoredisModule } from '@/modules/shared/ioredis';
 import { UserModule } from '@/modules/identity/user';
 import { httpModuleConfig } from '@/configs';
+import { MailModule } from '@/modules/email';
 @Module({
   imports: [
     HttpModule.register(httpModuleConfig),
@@ -16,6 +17,7 @@ import { httpModuleConfig } from '@/configs';
     UserModule,
     OtpModule,
     IoredisModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

@@ -5,22 +5,27 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
+import crypto from 'crypto';
 import JWT, { VerifyErrors } from 'jsonwebtoken';
 
 import { KEY_CACHE } from '@/common/constants';
 import { toErrorMessage } from '@/utils';
 import { IoredisService } from '@/modules/shared/ioredis';
-import {
+import { KeyTokenRepository } from './key-token.repository';
+import { KeyToken } from '@generated/prisma';
+import { extractInfoDevice } from '@/utils/extract-info-device';
+
+import type {
   AccessTokenPayload,
   KeyStoreForJWT,
   PairToken,
   RefreshTokenPayload,
+  TempTokenPayload,
 } from '@/types/jwt';
-import { KeyTokenRepository } from './key-token.repository';
-import { KeyToken } from '@generated/prisma';
-import { extractInfoDevice } from '@/utils/extract-info-device';
-import { Session } from '@/types/session';
+import type { Session } from '@/types/session';
+import type { EnvConfig } from '@/configs';
 
 @Injectable()
 export class KeyTokenService {
@@ -29,6 +34,7 @@ export class KeyTokenService {
   constructor(
     private readonly redisService: IoredisService,
     private readonly keyTokenRepository: KeyTokenRepository,
+    private readonly configService: ConfigService<EnvConfig>,
   ) {}
 
   async createKeyToken({
@@ -161,7 +167,7 @@ export class KeyTokenService {
           ipAddress: deviceInfo.ipAddress || '0.0.0.0',
         },
         createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + '3D').toISOString(),
+        expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days
         revoked: false,
       };
 
@@ -181,6 +187,34 @@ export class KeyTokenService {
     } catch (error) {
       this.logger.error('error createTokenPair:', toErrorMessage(error));
       throw new InternalServerErrorException('Failed to create token pair');
+    }
+  }
+
+  createTempToken(payload: TempTokenPayload): {
+    tempToken: string;
+    expiresIn: number;
+  } {
+    try {
+      const tempTokenSecret =
+        this.configService.get<EnvConfig['TEMP_TOKEN_SECRET']>(
+          'TEMP_TOKEN_SECRET',
+        ) ?? crypto.randomBytes(32).toString('hex');
+      const tempTokenExpiresIn =
+        this.configService.get<EnvConfig['TEMP_TOKEN_EXPIRES_IN']>(
+          'TEMP_TOKEN_EXPIRES_IN',
+        ) ?? 5 * 60;
+      const tempToken = JWT.sign(payload, tempTokenSecret, {
+        expiresIn: tempTokenExpiresIn,
+        algorithm: 'HS256',
+      });
+
+      return {
+        tempToken,
+        expiresIn: tempTokenExpiresIn,
+      };
+    } catch (error) {
+      this.logger.error('error createTempToken:', toErrorMessage(error));
+      throw new InternalServerErrorException('Failed to create temp token');
     }
   }
 
@@ -332,6 +366,21 @@ export class KeyTokenService {
       console.log(`decode verify::`, decoded);
       // TODO: Add logic to save to session
       // saveToSession(decoded);
+    }
+  }
+
+  async saveTempTokenToRedis(
+    tempTokenKey: string,
+    tempToken: string,
+    expiresIn: number,
+  ): Promise<void> {
+    try {
+      await this.redisService.set(tempTokenKey, tempToken, expiresIn);
+    } catch (error) {
+      this.logger.error('error saveTempTokenToRedis:', toErrorMessage(error));
+      throw new InternalServerErrorException(
+        'Failed to save temp token to redis',
+      );
     }
   }
 }

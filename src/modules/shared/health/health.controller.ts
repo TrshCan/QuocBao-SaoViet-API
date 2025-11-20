@@ -12,7 +12,8 @@ import {
 
 import { KEY_THROTTLER } from '@/common/constants';
 
-import { PrismaService } from '@/modules/shared/prisma/prisma.service';
+import { PrismaService } from '@/modules/shared/prisma';
+import { MailService } from '@/modules/mail';
 import { IoredisHealthIndicator } from '../ioredis';
 import { REDIS_CLIENT } from '../ioredis/ioredis.constants';
 
@@ -30,6 +31,7 @@ export class HealthController {
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClient,
     private prisma: PrismaHealthIndicator,
     private prismaService: PrismaService,
+    private mailService: MailService,
   ) {}
 
   /**
@@ -55,6 +57,20 @@ export class HealthController {
 
     return {
       message: 'Health check successfully!',
+      metadata: result,
+    };
+  }
+
+  /**
+   * Check the health of the email service
+   * @returns The health check result
+   */
+  @Get('email')
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 10000 } })
+  async checkEmail(): Promise<ResponseController<boolean>> {
+    const result = await this.mailService.checkTransporter();
+    return {
+      message: 'Email service health check successfully!',
       metadata: result,
     };
   }

@@ -38,3 +38,9 @@ export interface PairToken {
   iat_refreshToken: number;
   exp_refreshToken: number;
 }
+
+export interface TempTokenPayload {
+  uid: string;
+  email: string;
+  type: 'reset-password';
+}
