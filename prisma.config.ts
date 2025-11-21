@@ -1,11 +1,16 @@
 import 'dotenv/config';
+import { type PrismaConfig, env } from 'prisma/config';
 import path from 'node:path';
-import type { PrismaConfig } from 'prisma';
+
+type Env = {
+  DATABASE_URL: string;
+};
 
 export default {
   schema: path.join('prisma'),
   migrations: {
     path: path.join('prisma', 'migrations'),
+    seed: 'tsx prisma/seed/seed.ts',
   },
   views: {
     path: path.join('prisma', 'views'),
@@ -13,8 +18,7 @@ export default {
   typedSql: {
     path: path.join('prisma', 'queries'),
   },
-  engine: 'classic',
   datasource: {
-    url: process.env.DATABASE_URL || '',
+    url: env<Env>('DATABASE_URL'),
   },
 } satisfies PrismaConfig;
