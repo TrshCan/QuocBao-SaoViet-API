@@ -159,8 +159,5 @@
   },
   "engines": {
     "node": "^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0"
-  },
-  "prisma": {
-    "seed": "ts-node -r tsconfig-paths/register prisma/seed/seed.ts"
   }
 }
