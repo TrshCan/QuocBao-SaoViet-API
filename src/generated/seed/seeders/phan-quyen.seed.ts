@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 
 export async function seedPhanQuyen(prisma: PrismaClient) {
   const users = await prisma.user.findMany();

@@ -1,4 +1,5 @@
-import { PrismaClient, TrangThaiNhap } from '../../../generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
+import { TrangThaiNhap } from '@/generated/prisma/enums';
 
 export async function seedPhieuNhapKho(prisma: PrismaClient) {
   const khos = await prisma.kho.findMany();

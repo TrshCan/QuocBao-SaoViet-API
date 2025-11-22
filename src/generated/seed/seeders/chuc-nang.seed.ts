@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 
 export async function seedChucNang(prisma: PrismaClient) {
   const chucNangs = [

@@ -1,8 +1,9 @@
-import { PrismaClient, UserStatus } from '../../../generated/prisma'
-import bcrypt from 'bcrypt'
+import { PrismaClient } from '@/generated/prisma/client';
+import { UserStatus } from '@/generated/prisma/enums';
+import bcrypt from 'bcrypt';
 
 export async function seedUsers(prisma: PrismaClient) {
-  const hashedPassword = await bcrypt.hash('Admin@123', 10)
+  const hashedPassword = await bcrypt.hash('Admin@123', 10);
 
   const users = [
     {
@@ -60,16 +61,15 @@ export async function seedUsers(prisma: PrismaClient) {
       status: UserStatus.active,
       createdBy: 'admin',
     },
-  ]
+  ];
 
   for (const user of users) {
     await prisma.user.upsert({
       where: { username: user.username },
       update: {},
       create: user,
-    })
+    });
   }
 
-  console.log(`   ✓ Seeded ${users.length} users`)
+  console.log(`   ✓ Seeded ${users.length} users`);
 }
-

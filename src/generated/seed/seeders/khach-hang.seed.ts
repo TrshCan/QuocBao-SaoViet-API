@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 
 export async function seedKhachHang(prisma: PrismaClient) {
   const khachHangs = [

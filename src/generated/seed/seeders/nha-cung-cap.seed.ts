@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 
 export async function seedNhaCungCap(prisma: PrismaClient) {
   const nhaCungCaps = [

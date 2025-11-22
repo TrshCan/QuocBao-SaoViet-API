@@ -14,7 +14,6 @@ import { KEY_CACHE } from '@/common/constants';
 import { toErrorMessage } from '@/utils';
 import { IoredisService } from '@/modules/shared/ioredis';
 import { KeyTokenRepository } from './key-token.repository';
-import { KeyToken } from '@generated/prisma';
 import { extractInfoDevice } from '@/utils/extract-info-device';
 
 import type {
@@ -26,6 +25,7 @@ import type {
 } from '@/types/jwt';
 import type { Session } from '@/types/session';
 import type { EnvConfig } from '@/configs';
+import { KeyToken } from '@/generated/prisma/client';
 
 @Injectable()
 export class KeyTokenService {

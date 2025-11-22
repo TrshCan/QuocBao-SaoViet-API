@@ -1,7 +1,7 @@
 // Prisma schema - minimal template
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 generator dbml {

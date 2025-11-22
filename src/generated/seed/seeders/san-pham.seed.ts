@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 
 export async function seedSanPham(prisma: PrismaClient) {
   const donViTinhs = await prisma.donViTinh.findMany();

@@ -3,9 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+
+import { Decimal } from '@prisma/client/runtime/client';
+
+import { ChiTietNhapKhoCreateManyInput } from '@/generated/prisma/models/ChiTietNhapKho';
+import { TrangThaiNhap } from '@/generated/prisma/enums';
 import { PrismaService } from '../shared/prisma';
-import { Prisma } from '@generated/prisma';
-import { TrangThaiNhapEnum } from '@/common/enums/status';
 
 @Injectable()
 export class ReceiptsService {
@@ -47,12 +50,12 @@ export class ReceiptsService {
         },
       });
 
-      const chiTietData: Prisma.ChiTietNhapKhoCreateManyInput[] = dto.items.map(
+      const chiTietData: ChiTietNhapKhoCreateManyInput[] = dto.items.map(
         (i) => ({
           phieuId: header.id,
           sanPhamId: i.sanPhamId,
-          soLuong: new Prisma.Decimal(i.soLuong),
-          donGia: i.donGia ? new Prisma.Decimal(i.donGia) : undefined,
+          soLuong: new Decimal(i.soLuong),
+          donGia: i.donGia ? new Decimal(i.donGia) : undefined,
           soLo: i.soLo,
           hanSuDung: i.hanSuDung ? new Date(i.hanSuDung) : undefined,
           soSerial: i.soSerial,
@@ -92,7 +95,7 @@ export class ReceiptsService {
         include: { chiTiet: true },
       });
       if (!header) throw new NotFoundException('Không tìm thấy phiếu nhập');
-      if (header.trangThai === TrangThaiNhapEnum.DONE) return header;
+      if (header.trangThai === TrangThaiNhap.DONE) return header;
 
       for (const row of header.chiTiet) {
         const existing = await tx.tonKho.findFirst({
@@ -128,7 +131,7 @@ export class ReceiptsService {
 
       return tx.phieuNhapKho.update({
         where: { id },
-        data: { trangThai: TrangThaiNhapEnum.DONE },
+        data: { trangThai: TrangThaiNhap.DONE },
         include: { chiTiet: true },
       });
     });
