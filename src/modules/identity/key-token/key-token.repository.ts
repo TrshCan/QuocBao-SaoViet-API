@@ -1,10 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { Prisma } from '@generated/prisma';
 import { PrismaService } from '@/modules/shared/prisma';
-import { DefaultArgs } from '@generated/prisma/runtime/library';
 import { IoredisService } from '@/modules/shared/ioredis';
-import { Session } from '@/types/session';
+
+import type { Session } from '@/types/session';
+import type { DefaultArgs } from '@prisma/client/runtime/client';
+import type {
+  KeyTokenCreateInput,
+  KeyTokenGetPayload,
+  KeyTokenSelect,
+  KeyTokenUpdateInput,
+  KeyTokenWhereInput,
+} from '@/generated/prisma/models/KeyToken';
 
 @Injectable()
 export class KeyTokenRepository {
@@ -15,7 +22,7 @@ export class KeyTokenRepository {
     private redisService: IoredisService,
   ) {}
 
-  async findOneById<T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined>(
+  async findOneById<T extends KeyTokenSelect<DefaultArgs> | undefined>(
     id: string,
     options?: {
       select?: T;
@@ -28,9 +35,7 @@ export class KeyTokenRepository {
     return buildQuery;
   }
 
-  async findOneByUserId<
-    T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined,
-  >(
+  async findOneByUserId<T extends KeyTokenSelect<DefaultArgs> | undefined>(
     userId: string,
     options?: {
       select?: T;
@@ -43,46 +48,44 @@ export class KeyTokenRepository {
     return buildQuery;
   }
 
-  async findManyByFilter<
-    T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined,
-  >(
-    where: Prisma.KeyTokenWhereInput,
+  async findManyByFilter<T extends KeyTokenSelect<DefaultArgs> | undefined>(
+    where: KeyTokenWhereInput,
     options?: {
       select?: T;
     },
-  ): Promise<Prisma.KeyTokenGetPayload<{ select: T }>[] | null> {
+  ): Promise<KeyTokenGetPayload<{ select: T }>[] | null> {
     const buildQuery = (await this.prisma.keyToken.findMany({
       where,
       ...options,
-    })) as Prisma.KeyTokenGetPayload<{ select: T }>[] | null;
+    })) as KeyTokenGetPayload<{ select: T }>[] | null;
     return buildQuery;
   }
 
-  async createOne<T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined>(
-    data: Prisma.KeyTokenCreateInput,
+  async createOne<T extends KeyTokenSelect<DefaultArgs> | undefined>(
+    data: KeyTokenCreateInput,
     options?: {
       select?: T;
     },
-  ): Promise<Prisma.KeyTokenGetPayload<{ select: T }>> {
+  ): Promise<KeyTokenGetPayload<{ select: T }>> {
     const buildQuery = (await this.prisma.keyToken.create({
       data,
       ...options,
-    })) as Prisma.KeyTokenGetPayload<{ select: T }>;
+    })) as KeyTokenGetPayload<{ select: T }>;
     return buildQuery;
   }
 
-  async updateOneById<T extends Prisma.KeyTokenSelect<DefaultArgs> | undefined>(
+  async updateOneById<T extends KeyTokenSelect<DefaultArgs> | undefined>(
     id: string,
-    data: Prisma.KeyTokenUpdateInput,
+    data: KeyTokenUpdateInput,
     options?: {
       select?: T;
     },
-  ): Promise<Prisma.KeyTokenGetPayload<{ select: T }>> {
+  ): Promise<KeyTokenGetPayload<{ select: T }>> {
     const buildQuery = (await this.prisma.keyToken.update({
       where: { id },
       data,
       ...options,
-    })) as Prisma.KeyTokenGetPayload<{ select: T }>;
+    })) as KeyTokenGetPayload<{ select: T }>;
     return buildQuery;
   }
 
@@ -111,7 +114,7 @@ export class KeyTokenRepository {
     return !!isDeleted;
   }
 
-  async deleteManyByFilter(where: Prisma.KeyTokenWhereInput): Promise<boolean> {
+  async deleteManyByFilter(where: KeyTokenWhereInput): Promise<boolean> {
     const isDeleted = await this.prisma.keyToken.deleteMany({ where });
     return isDeleted.count > 0 ? true : false;
   }

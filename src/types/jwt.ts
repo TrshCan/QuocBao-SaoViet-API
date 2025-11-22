@@ -2,9 +2,9 @@
  * @description Registered Claim Names
  * @link https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
  */
-import { KeyToken } from '@generated/prisma';
-import { JwtPayload } from 'jsonwebtoken';
-import { RoleScope, RoleType } from './role';
+import type { JwtPayload } from 'jsonwebtoken';
+import type { RoleScope, RoleType } from './role';
+import type { KeyTokenModel } from '@/generated/prisma/models/KeyToken';
 
 export interface RefreshTokenPayload
   extends Pick<JwtPayload, 'aud' | 'exp' | 'iat'> {
@@ -26,7 +26,7 @@ export interface AccessTokenPayload
 }
 
 export type KeyStoreForJWT = Pick<
-  KeyToken,
+  KeyTokenModel,
   'id' | 'privateKey' | 'publicKey' | 'refreshToken' | 'refreshTokenUsed'
 >;
 

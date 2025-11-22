@@ -9,7 +9,7 @@ import { OtpModule } from '@/modules/identity/otp';
 import { IoredisModule } from '@/modules/shared/ioredis';
 import { UserModule } from '@/modules/identity/user';
 import { httpModuleConfig } from '@/configs';
-import { MailModule } from '@/modules/email';
+import { MailModule } from '@/modules/mail';
 @Module({
   imports: [
     HttpModule.register(httpModuleConfig),

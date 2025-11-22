@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Decimal } from '@prisma/client/runtime/library';
 
 import { PrismaService } from '../shared/prisma';
+import { Decimal } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class WarehousesService {

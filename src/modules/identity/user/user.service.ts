@@ -7,7 +7,7 @@ import {
 
 import { UserRepository } from './user.repository';
 import { toErrorMessage } from '@/utils';
-import { Prisma } from '@generated/prisma';
+import { UserGetPayload } from '@/generated/prisma/models/User';
 
 @Injectable()
 export class UserService {
@@ -44,7 +44,7 @@ export class UserService {
 }
 
 export type FoundCurrentUser = Pick<
-  Prisma.UserGetPayload<{
+  UserGetPayload<{
     select: {
       id: true;
       username: true;

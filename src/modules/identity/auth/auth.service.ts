@@ -16,14 +16,14 @@ import { UserRepository } from '../user';
 
 import { getInfoData } from '@/utils';
 
-import { Prisma } from '@generated/prisma';
-
 import type { AuthLoginDto } from './dto/auth-login.dto';
 import type { LoginResponse } from './interfaces/login';
 import type { EnvConfig } from '@/configs';
 import type { AccessTokenPayload, TempTokenPayload } from '@/types/jwt';
 import { AuthForgotPasswordDto } from './dto';
 import { KEY_CACHE } from '@/common/constants';
+import { UserGetPayload } from '@/generated/prisma/models/User';
+import { KeyTokenGetPayload } from '@/generated/prisma/models/KeyToken';
 
 @Injectable()
 export class AuthService {
@@ -355,7 +355,7 @@ export class AuthService {
 }
 
 export type FoundUserLogin = Pick<
-  Prisma.UserGetPayload<{
+  UserGetPayload<{
     select: {
       id: true;
       username: true;
@@ -380,7 +380,7 @@ export type FoundUserLogin = Pick<
 >;
 
 export type KeyStoreDataToRefreshToken = Pick<
-  Prisma.KeyTokenGetPayload<{
+  KeyTokenGetPayload<{
     select: {
       id: true;
       refreshToken: true;
