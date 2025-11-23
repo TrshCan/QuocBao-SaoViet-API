@@ -1,6 +1,21 @@
 services:
-  # PostgreSQL Database - Simple setup with full permissions
   postgres:
+    # Error: in 18+, these Docker images are configured to store database data in a
+    #  format which is compatible with "pg_ctlcluster" (specifically, using
+    #  major-version-specific directory names).  This better reflects how
+    #  PostgreSQL itself works, and how upgrades are to be performed.
+    #  See also https://github.com/docker-library/postgres/pull/1259⁠
+    #  Counter to that, there appears to be PostgreSQL data in:
+    #     /var/lib/postgresql/data (unused mount/volume)
+    #  This is usually the result of upgrading the Docker image without
+    #  upgrading the underlying database using "pg_upgrade" (which requires both
+    #  versions).
+    #  The suggested container configuration for 18+ is to place a single mount
+    #  at /var/lib/postgresql which will then place PostgreSQL data in a
+    #  subdirectory, allowing usage of "pg_upgrade --link" without mount point
+    #  boundary issues.
+    #  See https://github.com/docker-library/postgres/issues/37⁠ for a (long)
+    #  discussion around this process, and suggestions for how to do so.
     image: postgres:18
     container_name: saoviet-postgres-dev
     restart: unless-stopped
@@ -8,11 +23,21 @@ services:
       POSTGRES_DB: saoviet_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
-      POSTGRES_HOST_AUTH_METHOD: trust
+      # WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
+      #  anyone with access to the Postgres port to access your database without
+      #  a password, even if POSTGRES_PASSWORD is set. See PostgreSQL
+      #  documentation about "trust":
+      #  https://www.postgresql.org/docs/current/auth-trust.html⁠
+      #  In Docker's default configuration, this is effectively any other
+      #  container on the same system.
+      #  It is not recommended to use POSTGRES_HOST_AUTH_METHOD=trust. Replace
+      #  it with "-e POSTGRES_PASSWORD=password" instead to set a password in
+      #  "docker run".
+      # POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5433:5432"
     volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql
       - ./docker/postgres/init-simple.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d saoviet_db"]
@@ -20,7 +45,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis for development  
   redis:
     image: redis:7-alpine
     container_name: saoviet_redis_dev
@@ -40,7 +64,6 @@ services:
       timeout: 5s
       retries: 3
 
-  # PgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: saoviet-pgadmin-dev
