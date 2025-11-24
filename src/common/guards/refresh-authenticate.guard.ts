@@ -10,7 +10,7 @@ import {
 import type { Request } from 'express';
 
 import { KeyTokenService } from '@/modules/identity/key-token';
-import { CLIENT_ID, REFRESH_TOKEN } from '../constants';
+import { CLIENT_ID, REFRESH_TOKEN, VALUE_TOKEN } from '../constants';
 import { requireHeader, setRefreshUser, validateUserId } from '@/utils';
 import { RefreshTokenPayload, KeyStoreForJWT } from '@/types/jwt';
 
@@ -40,7 +40,15 @@ export class JwtRefreshAuthenticateGuard implements CanActivate {
         refreshToken,
         keyStore.privateKey,
       ) as RefreshTokenPayload;
+
       validateUserId(userId, decodedUser.id);
+
+      console.log('[JwtRefreshAuthenticateGuard] decodedUser:', decodedUser);
+
+      this.keyTokenService.validateToken<RefreshTokenPayload>(
+        { ...decodedUser, iat: decodedUser.iat ?? 0 },
+        VALUE_TOKEN.MAX_AGE_REFRESH_TOKEN,
+      );
 
       setRefreshUser(request, keyStore, decodedUser, refreshToken);
       return true;

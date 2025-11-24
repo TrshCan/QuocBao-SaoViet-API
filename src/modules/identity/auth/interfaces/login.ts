@@ -1,6 +1,6 @@
 import type { FoundUserLogin } from '../auth.service';
 
-export interface LoginResponse {
+export type LoginResponse = {
   user: Omit<FoundUserLogin, 'password' | 'secretOtp' | 'status'>;
   accessToken: string;
   refreshToken: string;
@@ -8,4 +8,4 @@ export interface LoginResponse {
   expiresInRefreshToken: number;
   iatAccessToken: number;
   iatRefreshToken: number;
-}
+};

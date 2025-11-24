@@ -1,6 +1,6 @@
-import { env } from 'prisma/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../prisma/client';
+import { PrismaClient } from '@/generated/prisma/client';
+import { envConfig } from '@/configs/config-env';
 
 import { seedUsers } from './seeders/user.seed';
 import { seedDonViTinh } from './seeders/don-vi-tinh.seed';
@@ -15,7 +15,7 @@ import { seedPhanQuyen } from './seeders/phan-quyen.seed';
 import { seedTrangThai } from './seeders/trang-thai.seed';
 import { seedPhieuNhapKho } from './seeders/phieu-nhap-kho.seed';
 
-const adapter = new PrismaPg({ connectionString: env<{ DATABASE_URL: string }>('DATABASE_URL') });
+const adapter = new PrismaPg({ connectionString: envConfig.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

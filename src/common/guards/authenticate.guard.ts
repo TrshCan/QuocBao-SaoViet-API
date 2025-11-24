@@ -18,11 +18,15 @@ import {
   setAccessUser,
   validateUserId,
 } from '@/utils';
-import { KeyStoreForJWT } from '@/types/jwt';
 
-import { AUTHORIZATION, CLIENT_ID, KEY_CACHE } from '@/common/constants';
+import {
+  AUTHORIZATION,
+  CLIENT_ID,
+  KEY_CACHE,
+  VALUE_TOKEN,
+} from '@/common/constants';
 
-import type { AccessTokenPayload } from '@/types/jwt';
+import type { AccessTokenPayload, KeyStoreForJWT } from '@/types/jwt';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
@@ -58,6 +62,13 @@ export class JwtAuthenticateGuard implements CanActivate {
       ) as AccessTokenPayload;
 
       validateUserId(userId, decodedUser.id);
+
+      console.log('[JwtAuthenticateGuard] decodedUser:', decodedUser);
+
+      this.keyTokenService.validateToken<AccessTokenPayload>(
+        { ...decodedUser, iat: decodedUser.iat ?? 0 },
+        VALUE_TOKEN.MAX_AGE_ACCESS_TOKEN,
+      );
 
       setAccessUser(request, keyStore, decodedUser);
 

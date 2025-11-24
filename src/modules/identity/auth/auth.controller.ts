@@ -31,7 +31,7 @@ import { MailEvents } from '@/common/enums/mail.events';
 
 import type { ResponseController } from '@/types/response-controller';
 import type { AuthLoginDto, AuthForgotPasswordDto } from './dto';
-import type { LoginResponse } from './interfaces';
+import type { LoginResponse, RefreshResponse } from './interfaces';
 import { type FoundCurrentUser, UserService } from '../user';
 import { type ForgotPasswordEmailPayload } from '@/modules/mail';
 
@@ -114,7 +114,7 @@ export class AuthController {
   async handleRefreshToken(
     @Req() request: Request,
     @Headers(REFRESH_TOKEN) refreshToken: string,
-  ): Promise<ResponseController<unknown>> {
+  ): Promise<ResponseController<RefreshResponse>> {
     const mergeRequest = {
       keyStoreId: request.refresh.keyStoreId,
       userId: request.refresh.id,

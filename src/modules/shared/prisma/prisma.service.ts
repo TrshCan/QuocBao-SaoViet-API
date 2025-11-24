@@ -1,9 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import { EnvConfig, envConfig } from '@/configs/config-env'
-import { PrismaClient } from '@/generated/prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { EnvConfig, envConfig } from '@/configs/config-env';
+import { PrismaClient } from '@/generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
 export class PrismaService
@@ -31,20 +31,20 @@ export class PrismaService
         },
       ],
       errorFormat: envConfig.NODE_ENV === 'production' ? 'minimal' : 'pretty',
-    })
+    });
   }
 
   async onModuleInit() {
-    await this.$connect()
+    await this.$connect();
     console.log(
       `[${envConfig.NODE_ENV}] - PrismaService - Connected to database`,
-    )
+    );
   }
 
   async onModuleDestroy() {
-    await this.$disconnect()
+    await this.$disconnect();
     console.log(
       `[${envConfig.NODE_ENV}] - PrismaService - Disconnected from database`,
-    )
+    );
   }
 }

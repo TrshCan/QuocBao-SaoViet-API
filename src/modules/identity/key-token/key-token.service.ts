@@ -220,9 +220,10 @@ export class KeyTokenService {
 
   verifyJWT(token: string, keySecret: string): string | JWT.JwtPayload {
     try {
-      return JWT.verify(token, keySecret, {
+      const decoded = JWT.verify(token, keySecret, {
         algorithms: ['RS256'],
       });
+      return decoded;
     } catch (error) {
       this.logger.error('Error verify JWT:', error);
       throw new UnauthorizedException('Invalid token');
@@ -366,6 +367,15 @@ export class KeyTokenService {
       console.log(`decode verify::`, decoded);
       // TODO: Add logic to save to session
       // saveToSession(decoded);
+    }
+  }
+
+  validateToken<TDecoded>(decoded: TDecoded & { iat: number }, maxAge: number) {
+    const now = Math.floor(Date.now() / 1000);
+    //   const maxAge = 60 * 60 * 10; // 10 hours
+
+    if (now - decoded.iat > maxAge) {
+      throw new UnauthorizedException('Token expired');
     }
   }
 
