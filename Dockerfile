@@ -101,5 +101,9 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/health || exit 1
 
+# Start the application with startup-prod.sh
+COPY startup-prod.sh /app/startup-prod.sh
+RUN chmod +x /app/startup-prod.sh
+
 # Start the application
-CMD ["node", "dist/main.js"]
+CMD ["sh", "/app/startup-prod.sh"]
