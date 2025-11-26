@@ -100,5 +100,6 @@ Copy the schema.dbml content and visualize it as an Entity-Relationship Diagram
 - [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
 - [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
 - [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
+- [Provision preview databases with GitHub Actions](https://www.prisma.io/docs/guides/github-actions)
 - [Prisma openapi](https://github.com/nitzano/prisma-openapi)
 - [Reference's TypeDoc](https://typedoc.org/index.html)
