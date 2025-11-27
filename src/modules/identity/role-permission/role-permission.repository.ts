@@ -30,4 +30,18 @@ export class RolePermissionRepository {
       ...options,
     });
   }
+
+  async findManyByRoleIds({
+    roleIds,
+    options,
+  }: {
+    roleIds: string[];
+    options?: { select?: RolePermissionQuery; include?: RolePermissionInclude };
+  }): Promise<RolePermissionResult[]> {
+    const buildQuery = await this.prisma.rolePermission.findMany({
+      where: { roleId: { in: roleIds } },
+      ...options,
+    });
+    return buildQuery;
+  }
 }

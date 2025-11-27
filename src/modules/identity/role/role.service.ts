@@ -1,38 +1,191 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { PrismaService } from '@/modules/shared/prisma';
 
 import { RoleRepository } from './role.repository';
 import { RoleClosureRepository } from '../role-closure';
 import { UserRoleRepository } from '../user-role';
+import { RolePermissionRepository } from '../role-permission';
 
-import type { RoleCreationDto } from './dto';
-import { Prisma } from '@/generated/prisma/client';
+import { ExtractPagination } from '@/utils/extract-pagination';
+
+import type { FindAllRolesDto, RoleCreationDto } from './dto';
+import { Prisma, Role } from '@/generated/prisma/client';
+
+export interface RoleTreeNode extends Role {
+  children: RoleTreeNode[];
+}
 
 @Injectable()
 export class RoleService {
   constructor(
     private prisma: PrismaService,
+    private extractPagination: ExtractPagination,
     private roleRepository: RoleRepository,
     private roleClosureRepository: RoleClosureRepository,
+    private rolePermissionRepository: RolePermissionRepository,
     private userRoleRepository: UserRoleRepository,
   ) {}
 
-  async createRole(data: RoleCreationDto) {
-    const transaction = await this.prisma.$transaction(async (tx) => {
-      const role = await this.roleRepository.createOneWithTransaction(tx, {
-        name: data.name,
-        description: data.description,
+  async findAllRoles(query: FindAllRolesDto) {
+    const { page, limit, search, sortBy, sortOrder } = query;
+
+    const searchQuery = this.extractPagination.buildSearchQuery(search);
+    const orderByQuery =
+      this.extractPagination.buildSortOrder<Prisma.RoleOrderByWithRelationInput>(
+        sortBy,
+        sortOrder,
+      );
+
+    const whereQuery: Prisma.RoleWhereInput = {
+      ...searchQuery,
+    };
+
+    const roles = await this.roleRepository.findMany({
+      where: whereQuery,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: orderByQuery,
+    });
+    return roles;
+  }
+
+  async getRoleTree() {
+    const roles = await this.prisma.role.findMany({
+      include: {
+        descendantClosures: true,
+        ancestorClosures: true,
+      },
+    });
+
+    const map = new Map<string, RoleTreeNode>();
+    roles.forEach((r) => {
+      map.set(r.id, {
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        createdAt: r.createdAt,
+        children: [],
+      });
+    });
+
+    // Assign relationship parent→child (depth=1)
+    for (const role of roles) {
+      for (const link of role.descendantClosures) {
+        if (link.depth === 1) {
+          const parent = map.get(role.id);
+          const child = map.get(link.descendantId);
+          if (parent && child) {
+            parent.children.push(child);
+          }
+        }
+      }
+    }
+
+    // Find root (role without parent depth=1)
+    const roots = roles
+      .filter((r) => !r.ancestorClosures.some((c) => c.depth === 1)) // role without parent depth=1
+      .map((r) => map.get(r.id));
+
+    return roots;
+  }
+
+  async findOneById(roleId: string) {
+    const role = await this.roleRepository.findOneById(roleId);
+    if (!role) throw new NotFoundException('Role not found');
+
+    const [parents, children, ancestors, descendants] = await Promise.all([
+      // // DIRECT parents (depth=1)
+      this.roleClosureRepository.findManyAncestorByDescendantId({
+        descendantId: role.id,
+        depth: 1,
+      }),
+      // DIRECT children (depth=1)
+      this.roleClosureRepository.findManyDescendantByAncestorId({
+        ancestorId: role.id,
+        depth: 1,
+      }),
+      // ALL ancestors (depth >= 1)
+      this.roleClosureRepository.findManyAncestorByDescendantId({
+        descendantId: role.id,
+        depth: { gte: 1 },
+      }),
+      // ALL descendants (depth >= 1)
+      this.roleClosureRepository.findManyDescendantByAncestorId({
+        ancestorId: role.id,
+        depth: { gte: 1 },
+      }),
+    ]);
+    // Permissions inherited: → ancestor roles provide permission to descendant
+    const inheritedPermissions =
+      await this.rolePermissionRepository.findManyByRoleIds({
+        roleIds: ancestors.map((a) => a.ancestorId).concat([role.id]),
+        options: { include: { permission: true } },
       });
 
-      await this.roleClosureRepository.createOneWithTransaction(tx, {
-        ancestor: { connect: { id: role.id } },
-        descendant: { connect: { id: role.id } },
-        depth: 0,
+    return {
+      ...role,
+      parents: parents.map((x) => x.ancestorId),
+      children: children.map((x) => x.descendantId),
+      ancestors: ancestors.map((x) => x.ancestorId),
+      descendants: descendants.map((x) => x.descendantId),
+      permissions: inheritedPermissions.map((x) => x.permissionId),
+    };
+  }
+
+  async findParentsByRoleId(roleId: string) {
+    const parents =
+      await this.roleClosureRepository.findManyAncestorByDescendantId({
+        descendantId: roleId,
+        depth: { gt: 0 },
       });
-      return role;
-    });
-    return transaction;
+    return parents;
+  }
+
+  async findChildrenByRoleId(roleId: string) {
+    const children =
+      await this.roleClosureRepository.findManyDescendantByAncestorId({
+        ancestorId: roleId,
+        depth: { gt: 0 },
+      });
+    return children;
+  }
+
+  async createRole(data: RoleCreationDto) {
+    const transactionToCreateEmptyRole = await this.prisma.$transaction(
+      async (tx) => {
+        const role = await this.roleRepository.createOneWithTransaction(tx, {
+          name: data.name,
+          description: data.description,
+        });
+
+        await this.roleClosureRepository.createOneWithTransaction(tx, {
+          ancestor: { connect: { id: role.id } },
+          descendant: { connect: { id: role.id } },
+          depth: 0,
+        });
+        return role;
+      },
+    );
+
+    if (data.parentRoleId) {
+      const transactionToAddParentToRole = await this.addParentToRole(
+        transactionToCreateEmptyRole.id,
+        data.parentRoleId,
+      );
+      return {
+        role: transactionToCreateEmptyRole,
+        addParent: transactionToAddParentToRole,
+      };
+    }
+
+    return {
+      role: transactionToCreateEmptyRole,
+    };
   }
 
   async addParentToRole(childRoleId: string, parentRoleId: string) {
@@ -55,26 +208,26 @@ export class RoleService {
       }
       // get all ancestor of parent (a)
       const parentAncestors =
-        await this.roleClosureRepository.findManyAncestorByDescendantId(
-          parentRoleId,
-          {
+        await this.roleClosureRepository.findManyAncestorByDescendantId({
+          descendantId: parentRoleId,
+          options: {
             select: {
               ancestorId: true,
               depth: true,
             },
           },
-        );
+        });
       // get all descendant of child (d)
       const childDescendants =
-        await this.roleClosureRepository.findManyDescendantByAncestorId(
-          childRoleId,
-          {
+        await this.roleClosureRepository.findManyDescendantByAncestorId({
+          ancestorId: childRoleId,
+          options: {
             select: {
               descendantId: true,
               depth: true,
             },
           },
-        );
+        });
       // Merge all (a, d) then insert row into depth = dept(a -> parent) + 1 + dept(child -> d)
       const closureRelationsToInsert: Prisma.RoleClosureCreateManyInput[] = [];
       for (const parentAncestor of parentAncestors) {
@@ -131,5 +284,59 @@ export class RoleService {
     });
 
     return createUserRole;
+  }
+
+  async deleteParentFromRole(childRoleId: string, parentRoleId: string) {
+    const transaction = this.prisma.$transaction(async (tx) => {
+      const checkExistenceOfRoleClosure =
+        await this.roleClosureRepository.findUniqueByAncestorIdDescendantIdWithTransaction(
+          tx,
+          parentRoleId,
+          childRoleId,
+        );
+
+      if (
+        !checkExistenceOfRoleClosure ||
+        checkExistenceOfRoleClosure.depth !== 1
+      ) {
+        throw new BadRequestException('Parent is not a direct parent of child');
+      }
+
+      // get all ancestor of parent
+      const parentAncestors =
+        await this.roleClosureRepository.findManyAncestorByDescendantId({
+          descendantId: parentRoleId,
+          options: {
+            select: {
+              ancestorId: true,
+              // depth: true,
+            },
+          },
+        });
+      // get all descendant of child
+      const childDescendants =
+        await this.roleClosureRepository.findManyDescendantByAncestorId({
+          ancestorId: childRoleId,
+          options: {
+            select: {
+              descendantId: true,
+              // depth: true,
+            },
+          },
+        });
+
+      // delete all path ancestor(parent) → descendant(child)
+      await this.roleClosureRepository.deleteManyByAncestorIdDescendantIdWithTransaction(
+        {
+          tx,
+          ancestorId: { in: parentAncestors.map((p) => p.ancestorId) },
+          descendantId: { in: childDescendants.map((c) => c.descendantId) },
+          // validate depth > 0 to void self-reference
+          depth: { gt: 0 },
+        },
+      );
+      return true;
+    });
+    return transaction;
   }
 }

@@ -14,6 +14,38 @@ type RoleResult = Prisma.RoleGetPayload<{
 export class RoleRepository {
   constructor(private prisma: PrismaService) {}
 
+  async findMany(query: Prisma.RoleFindManyArgs) {
+    const { take: limit, skip: offset, where, orderBy, ...rest } = query;
+    const buildQuery = await this.prisma.role.findMany({
+      take: limit,
+      skip: offset,
+      where,
+      orderBy,
+      ...rest,
+    });
+    return buildQuery;
+  }
+
+  async thenCount(query: Prisma.RoleCountArgs) {
+    const { where, ...rest } = query;
+    const buildQuery = await this.prisma.role.count({
+      where,
+      ...rest,
+    });
+    return buildQuery;
+  }
+
+  async findOneById(
+    roleId: string,
+    options?: { select?: RoleQuery; include?: RoleInclude },
+  ) {
+    const buildQuery = await this.prisma.role.findUnique({
+      where: { id: roleId },
+      ...options,
+    });
+    return buildQuery;
+  }
+
   async createOneWithTransaction<
     T extends RoleQuery = null,
     I extends RoleInclude = null,

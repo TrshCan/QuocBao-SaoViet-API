@@ -32,6 +32,7 @@ FROM base AS development
 ENV NODE_ENV=development
 RUN yarn install --frozen-lockfile
 COPY . .
+COPY .env.development .env
 RUN yarn prisma generate
 EXPOSE 3000 9229
 CMD ["yarn", "start"]
@@ -46,6 +47,7 @@ RUN --mount=type=cache,id=yarn-cache,target=/root/.cache/yarn \
 
 # Copy source code
 COPY . .
+COPY .env.production .env
 
 # Generate Prisma client with correct binary targets
 RUN yarn prisma generate
@@ -79,6 +81,7 @@ COPY --from=build --chown=nodeuser:nodejs /app/package.json ./
 COPY --from=build --chown=nodeuser:nodejs /app/yarn.lock ./
 COPY --from=build --chown=nodeuser:nodejs /app/prisma.config.ts ./
 COPY --from=build --chown=nodeuser:nodejs /app/nest-cli.json ./
+COPY --from=build --chown=nodeuser:nodejs /app/.env.production ./
 
 # Create directories for uploads and logs with proper structure
 RUN mkdir -p uploads logs && \

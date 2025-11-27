@@ -42,29 +42,39 @@ export class RoleClosureRepository {
     return buildQuery;
   }
 
-  async findManyAncestorByDescendantId(
-    descendantId: string,
+  async findManyAncestorByDescendantId({
+    descendantId,
+    options,
+    depth,
+  }: {
+    descendantId: string;
     options?: {
       select?: RoleClosureQuery;
       include?: RoleClosureInclude;
-    },
-  ): Promise<RoleClosureResult[]> {
+    };
+    depth?: number | { gt: number } | { gte: number };
+  }): Promise<RoleClosureResult[]> {
     const buildQuery = await this.prisma.roleClosure.findMany({
-      where: { descendantId },
+      where: { descendantId, depth },
       ...options,
     });
     return buildQuery;
   }
 
-  async findManyDescendantByAncestorId(
-    ancestorId: string,
+  async findManyDescendantByAncestorId({
+    ancestorId,
+    options,
+    depth,
+  }: {
+    ancestorId: string;
     options?: {
       select?: RoleClosureQuery;
       include?: RoleClosureInclude;
-    },
-  ): Promise<RoleClosureResult[]> {
+    };
+    depth?: number | { gt: number } | { gte: number };
+  }): Promise<RoleClosureResult[]> {
     const buildQuery = await this.prisma.roleClosure.findMany({
-      where: { ancestorId },
+      where: { ancestorId, depth },
       ...options,
     });
     return buildQuery;
@@ -122,6 +132,27 @@ export class RoleClosureRepository {
     const buildQuery = await tx.roleClosure.create({
       data,
       ...options,
+    });
+    return buildQuery;
+  }
+
+  async deleteManyByAncestorIdDescendantIdWithTransaction({
+    tx,
+    ancestorId,
+    descendantId,
+    depth,
+  }: {
+    tx: Prisma.TransactionClient;
+    ancestorId: string | { in: string[] };
+    descendantId: string | { in: string[] };
+    depth?: number | { gt: number };
+  }) {
+    const buildQuery = await tx.roleClosure.deleteMany({
+      where: {
+        ancestorId,
+        descendantId,
+        depth,
+      },
     });
     return buildQuery;
   }

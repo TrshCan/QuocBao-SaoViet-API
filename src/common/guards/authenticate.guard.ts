@@ -27,6 +27,8 @@ import {
 } from '@/common/constants';
 
 import type { AccessTokenPayload, KeyStoreForJWT } from '@/types/jwt';
+import { PUBLIC_KEY } from '../decorators';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
@@ -35,11 +37,17 @@ export class JwtAuthenticateGuard implements CanActivate {
   constructor(
     private readonly keyTokenService: KeyTokenService,
     private readonly redisService: IoredisService,
+    private readonly reflector: Reflector,
   ) {}
   async canActivate(context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest<Request>();
+    const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
 
     try {
+      const request = context.switchToHttp().getRequest<Request>();
       const userId = requireHeader(request, CLIENT_ID);
       const authHeader = requireHeader(request, AUTHORIZATION);
       const accessToken = handleBearerToken(authHeader);
