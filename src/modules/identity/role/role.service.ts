@@ -37,6 +37,10 @@ export class RoleService {
 
   async addParentToRole(childRoleId: string, parentRoleId: string) {
     const transaction = this.prisma.$transaction(async (tx) => {
+      // Check if childRoleId is the same as parentRoleId
+      if (childRoleId === parentRoleId) {
+        throw new BadRequestException('A role cannot be parent of itself');
+      }
       // Check if childRoleId is already a descendant of parentRoleId
       const isDescendant =
         await this.roleClosureRepository.findUniqueByAncestorIdDescendantIdWithTransaction(
