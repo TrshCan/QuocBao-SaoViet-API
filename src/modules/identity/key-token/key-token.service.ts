@@ -251,6 +251,9 @@ export class KeyTokenService {
 
       return keyStore;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       const message = toErrorMessage(error);
       this.logger.error('Redis cache error, falling back to database', {
         error: message,

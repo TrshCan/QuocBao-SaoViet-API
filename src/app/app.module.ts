@@ -10,7 +10,11 @@ import { MulterModule } from '@/infrastructures/storages';
 import { ThrottlerModule } from '@/infrastructures/throttler';
 import { ConfigModule } from '@/infrastructures/config';
 
-import { RolesGuard } from '@/common/guards';
+import {
+  JwtAuthenticateGuard,
+  PermissionGuard,
+  RolesGuard,
+} from '@/common/guards';
 
 import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
 import {
@@ -20,6 +24,7 @@ import {
   RolePermissionModule,
   UserRoleModule,
   PermissionModule,
+  KeyTokenModule,
 } from '@/modules/identity';
 import { MailModule } from '@/modules/mail';
 import { ReceiptsModule } from '@/modules/receipts';
@@ -39,6 +44,7 @@ import { ProductsModule } from '@/modules/products';
     MailModule,
     // Identity Context
     AuthModule,
+    KeyTokenModule,
     RoleModule,
     RoleClosureModule,
     RolePermissionModule,
@@ -53,13 +59,25 @@ import { ProductsModule } from '@/modules/products';
   controllers: [AppController],
   providers: [
     AppService,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ApiAuthGuard,
+    // },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
     {
       provide: APP_GUARD,
+      useClass: JwtAuthenticateGuard,
+    },
+    {
+      provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
     },
   ],
 })

@@ -6,7 +6,7 @@
  - depth > 1 => ancestor several levels above
 */
 model RoleClosure {
-  id           String   @id @default(uuid())
+  id           String   @id @default(uuid(7))
   ancestorId   String
   descendantId String
   depth        Int      // 0 = same node, 1 = direct parent->child, ...

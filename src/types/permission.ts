@@ -5,8 +5,16 @@ import { PermissionResource as PermissionResourceEnum } from '@/common/enums';
 export type PermissionActionTypes = PermissionActionEnum;
 export type PermissionResourceTypes = PermissionResourceEnum;
 
-// export type PermissionTypes =
-//   `${PermissionActionTypes}.${PermissionResourceTypes}`;
+/**
+ * @description Permission type, used for config-permission
+ * @deprecated remove in future
+ */
+export type PermissionTypes =
+  `${PermissionActionTypes}.${PermissionResourceTypes}`;
+
+/**
+ * @description Permission object type, used for permission guard
+ */
 export type PermissionObjectTypes = {
   action: PermissionActionTypes;
   resource: PermissionResourceTypes;

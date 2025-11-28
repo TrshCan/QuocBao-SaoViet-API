@@ -1,5 +1,5 @@
 model UserRole {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid(7))
   userId    String
   roleId    String
   assignedAt DateTime @default(now())

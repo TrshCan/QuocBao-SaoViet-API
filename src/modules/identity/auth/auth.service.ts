@@ -24,6 +24,8 @@ import { AuthForgotPasswordDto } from './dto';
 import { KEY_CACHE } from '@/common/constants';
 import { UserGetPayload } from '@/generated/prisma/models/User';
 import { KeyTokenGetPayload } from '@/generated/prisma/models/KeyToken';
+import { RolesType } from '@/types/role';
+import { RolesScope as RolesScopeEnum } from '@/common/enums/roles-scope';
 
 @Injectable()
 export class AuthService {
@@ -115,8 +117,8 @@ export class AuthService {
         email: foundUser.email ?? '',
         username: foundUser.username,
         fullName: foundUser.fullName,
-        role: 'super_admin',
-        roleScope: 'SYSTEM',
+        role: foundUser.role as RolesType,
+        roleScope: RolesScopeEnum.SYSTEM,
         permissions: [],
         aud: 'access:common',
       },
@@ -263,8 +265,8 @@ export class AuthService {
         email: isFoundUser.email ?? '',
         username: isFoundUser.username,
         fullName: isFoundUser.fullName,
-        role: 'super_admin',
-        roleScope: 'SYSTEM',
+        role: isFoundUser.role as RolesType,
+        roleScope: RolesScopeEnum.SYSTEM,
         permissions: [],
         aud: 'access:common',
       },

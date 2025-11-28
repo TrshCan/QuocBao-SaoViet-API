@@ -1,5 +1,8 @@
-import { ROLE_DEFINITIONS } from '@/configs';
+import { Roles } from '@/common/enums/roles';
+import { RolesScope } from '@/common/enums/roles-scope';
+// import { ROLE_DEFINITIONS } from '@/configs';
 
-export type RoleType = (typeof ROLE_DEFINITIONS)[keyof typeof ROLE_DEFINITIONS];
+// export type RoleType = (typeof ROLE_DEFINITIONS)[keyof typeof ROLE_DEFINITIONS];
+export type RolesType = Roles;
 
-export type RoleScope = 'SYSTEM' | 'COMPANY' | 'ASC_CENTER';
+export type RolesScopeType = RolesScope;

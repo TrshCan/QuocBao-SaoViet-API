@@ -43,7 +43,7 @@ describe('Auth Http Service Unit Test', () => {
         username: 'test',
         email: 'test@example.com',
         fullName: 'Test User',
-        role: 'super_admin',
+        role: 'admin',
         // permissions: [], as unknown as FoundUserLogin['permissions']
       };
 

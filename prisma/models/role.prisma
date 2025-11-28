@@ -1,5 +1,5 @@
 model Role {
-  id          String         @id @default(uuid())
+  id          String         @id @default(uuid(7))
   name        String         @unique
   description String?
   createdAt   DateTime       @default(now())

@@ -3,7 +3,7 @@
  * @link https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
  */
 import type { JwtPayload } from 'jsonwebtoken';
-import type { RoleScope, RoleType } from './role';
+import type { RolesScopeType, RolesType } from './role';
 import type { KeyTokenModel } from '@/generated/prisma/models/KeyToken';
 
 export interface RefreshTokenPayload
@@ -20,8 +20,8 @@ export interface AccessTokenPayload
   email: string;
   username: string;
   fullName: string;
-  role: RoleType;
-  roleScope: RoleScope;
+  role: RolesType;
+  roleScope: RolesScopeType;
   permissions: string[];
 }
 

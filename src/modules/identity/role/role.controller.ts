@@ -12,14 +12,15 @@ import {
 
 import { Roles } from '@/common/decorators';
 import { Roles as RolesEnum } from '@/common/enums';
-import { JwtAuthenticateGuard, RolesGuard } from '@/common/guards';
+import { RolesGuard } from '@/common/guards';
 import { ZodValidationPipe } from '@/common/pipes';
 
-import { RoleService, type RoleTreeNode } from '.';
+import { RoleService, type RoleTreeNode } from './role.service';
 
 import {
   addParentToRoleSchema,
   deleteParentFromRoleSchema,
+  findAllRolesSchema,
   findByIdSchema,
   findChildrenRolesSchema,
   findParentsRolesSchema,
@@ -39,12 +40,17 @@ import type {
 import type { Role } from '@/generated/prisma/client';
 
 @Controller('role')
-@UseGuards(RolesGuard, JwtAuthenticateGuard)
+@UseGuards(RolesGuard)
 @Roles(RolesEnum.ADMIN)
 export class RoleController {
   constructor(private roleService: RoleService) {}
 
   @Get()
+  @UsePipes(
+    new ZodValidationPipe<FindAllRolesDto, FindAllRolesDto>({
+      query: findAllRolesSchema,
+    }),
+  )
   async findAllRoles(
     @Query() query: FindAllRolesDto,
   ): Promise<ResponseController<unknown>> {
@@ -56,6 +62,7 @@ export class RoleController {
   }
 
   @Get('tree')
+  // @UseGuards(JwtAuthenticateGuard)
   async getRoleTree(): Promise<
     ResponseController<(RoleTreeNode | undefined)[]>
   > {
@@ -67,15 +74,16 @@ export class RoleController {
   }
 
   @Get(':roleId')
+  // @UseGuards(JwtAuthenticateGuard)
   @UsePipes(
     new ZodValidationPipe<FindByIdDto, FindByIdDto>({
-      param: findByIdSchema,
+      param: findByIdSchema.shape.roleId,
     }),
   )
   async findOneById(
-    @Param() params: FindByIdDto,
+    @Param('roleId') roleId: string,
   ): Promise<ResponseController<unknown>> {
-    const result = await this.roleService.findOneById(params.roleId);
+    const result = await this.roleService.findOneById(roleId);
     return {
       message: 'Role fetched successfully',
       metadata: result,
@@ -88,6 +96,7 @@ export class RoleController {
       param: findParentsRolesSchema,
     }),
   )
+  // @UseGuards(JwtAuthenticateGuard)
   async findParentsByRoleId(
     @Param() params: FindParentsRolesDto,
   ): Promise<ResponseController<unknown>> {
@@ -104,6 +113,7 @@ export class RoleController {
       param: findChildrenRolesSchema,
     }),
   )
+  // @UseGuards(JwtAuthenticateGuard)
   async findChildrenByRoleId(
     @Param() params: FindChildrenRolesDto,
   ): Promise<ResponseController<unknown>> {
@@ -120,6 +130,7 @@ export class RoleController {
       body: roleCreationSchema,
     }),
   )
+  // @UseGuards(JwtAuthenticateGuard)
   async createRole(
     @Body() body: RoleCreationDto,
   ): Promise<ResponseController<{ role: Role; addParent?: boolean }>> {
@@ -136,6 +147,7 @@ export class RoleController {
       param: addParentToRoleSchema,
     }),
   )
+  // @UseGuards(JwtAuthenticateGuard)
   async addParentToRole(
     @Param() params: AddParentToRoleDto,
   ): Promise<ResponseController<boolean>> {
@@ -155,6 +167,7 @@ export class RoleController {
       param: deleteParentFromRoleSchema,
     }),
   )
+  // @UseGuards(JwtAuthenticateGuard)
   async deleteParentFromRole(
     @Param() params: DeleteParentFromRoleDto,
   ): Promise<ResponseController<boolean>> {
