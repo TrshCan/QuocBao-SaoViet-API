@@ -62,7 +62,6 @@ export class RoleController {
   }
 
   @Get('tree')
-  // @UseGuards(JwtAuthenticateGuard)
   async getRoleTree(): Promise<
     ResponseController<(RoleTreeNode | undefined)[]>
   > {
@@ -74,7 +73,6 @@ export class RoleController {
   }
 
   @Get(':roleId')
-  // @UseGuards(JwtAuthenticateGuard)
   @UsePipes(
     new ZodValidationPipe<FindByIdDto, FindByIdDto>({
       param: findByIdSchema.shape.roleId,

@@ -129,11 +129,11 @@ export class RoleService {
 
     return {
       ...role,
-      parents: parents.map((x) => x.ancestorId),
-      children: children.map((x) => x.descendantId),
-      ancestors: ancestors.map((x) => x.ancestorId),
-      descendants: descendants.map((x) => x.descendantId),
-      permissions: inheritedPermissions.map((x) => x.permissionId),
+      parents: parents,
+      children: children,
+      ancestors: ancestors,
+      descendants: descendants,
+      permissions: inheritedPermissions,
     };
   }
 

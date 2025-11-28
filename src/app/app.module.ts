@@ -10,12 +10,6 @@ import { MulterModule } from '@/infrastructures/storages';
 import { ThrottlerModule } from '@/infrastructures/throttler';
 import { ConfigModule } from '@/infrastructures/config';
 
-import {
-  JwtAuthenticateGuard,
-  PermissionGuard,
-  RolesGuard,
-} from '@/common/guards';
-
 import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
 import {
   AuthModule,
@@ -59,25 +53,9 @@ import { ProductsModule } from '@/modules/products';
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ApiAuthGuard,
-    // },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthenticateGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: PermissionGuard,
     },
   ],
 })
