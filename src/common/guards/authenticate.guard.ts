@@ -27,7 +27,7 @@ import {
 } from '@/common/constants';
 
 import type { AccessTokenPayload, KeyStoreForJWT } from '@/types/jwt';
-import { AUTHENTICATION_KEY } from '../decorators';
+// import { AUTHENTICATION_KEY } from '../decorators';
 import { Reflector } from '@nestjs/core';
 
 @Injectable()
@@ -41,11 +41,11 @@ export class JwtAuthenticateGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext) {
     try {
-      const isAuthentication = this.reflector.getAllAndOverride<boolean>(
-        AUTHENTICATION_KEY,
-        [context.getHandler(), context.getClass()],
-      );
-      if (!isAuthentication) return false;
+      // const isAuthentication = this.reflector.getAllAndOverride<boolean>(
+      //   AUTHENTICATION_KEY,
+      //   [context.getHandler(), context.getClass()],
+      // );
+      // if (!isAuthentication) return false;
 
       const request = context.switchToHttp().getRequest<Request>();
       const userId = requireHeader(request, CLIENT_ID);
