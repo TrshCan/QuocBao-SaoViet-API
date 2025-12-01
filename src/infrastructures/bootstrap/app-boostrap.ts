@@ -16,7 +16,8 @@ import {
   envConfig,
   helmetConfig,
   swaggerConfig,
-  swaggerOptions,
+  swaggerCustomOptions,
+  swaggerDocumentOptions,
   uploadDir,
 } from '@/configs';
 import { GlobalExceptionFilter } from '@/common/filters';
@@ -95,7 +96,7 @@ export class AppBootstrap {
       const document = SwaggerModule.createDocument(
         this.app,
         swaggerConfig,
-        swaggerOptions,
+        swaggerDocumentOptions,
       );
       const yamlDocument = loadOpenApiYaml();
 
@@ -106,7 +107,12 @@ export class AppBootstrap {
       return document;
     };
 
-    SwaggerModule.setup('api-docs', this.app, documentFactory);
+    SwaggerModule.setup(
+      'api-docs',
+      this.app,
+      documentFactory,
+      swaggerCustomOptions,
+    );
   }
 
   private setGlobalPrefix() {

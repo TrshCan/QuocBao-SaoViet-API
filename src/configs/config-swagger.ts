@@ -1,4 +1,8 @@
-import { DocumentBuilder, type SwaggerDocumentOptions } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  type SwaggerCustomOptions,
+  type SwaggerDocumentOptions,
+} from '@nestjs/swagger';
 
 export const swaggerConfig = new DocumentBuilder()
   .setTitle('Saoviet API')
@@ -12,4 +16,10 @@ export const swaggerConfig = new DocumentBuilder()
   .addTag('cats')
   .build();
 
-export const swaggerOptions: SwaggerDocumentOptions = {};
+export const swaggerDocumentOptions: SwaggerDocumentOptions = {};
+
+export const swaggerCustomOptions: SwaggerCustomOptions = {
+  swaggerOptions: {
+    persistAuthorization: true,
+  },
+};
