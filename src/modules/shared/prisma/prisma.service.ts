@@ -3,7 +3,11 @@ import { ConfigService } from '@nestjs/config';
 
 import { EnvConfig, envConfig } from '@/configs/config-env';
 import { PrismaClient } from '@/generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import {
+  getSimplePrismaProvider,
+  SystemDatabaseProviderTypes,
+} from './factories/prisma.factory';
+import { SystemDatabaseProvider as SystemDatabaseProviderEnum } from '@/common/enums';
 
 @Injectable()
 export class PrismaService
@@ -11,11 +15,13 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor(private readonly configService: ConfigService<EnvConfig>) {
+    const databaseProvider: SystemDatabaseProviderTypes =
+      configService.get<EnvConfig['SYSTEM_DATABASE_PROVIDER_POSTGRES']>(
+        'SYSTEM_DATABASE_PROVIDER_POSTGRES',
+      ) || SystemDatabaseProviderEnum.LOCAL;
+
     super({
-      adapter: new PrismaPg({
-        connectionString:
-          configService.get<EnvConfig['DATABASE_URL']>('DATABASE_URL'),
-      }),
+      adapter: getSimplePrismaProvider(databaseProvider).adapter,
       log: [
         {
           level: 'warn',

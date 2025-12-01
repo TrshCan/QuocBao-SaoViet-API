@@ -38,14 +38,22 @@ export const envConfig: EnvConfig = envConfigSchema.parse({
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
   ENCRYPTION_IV_LENGTH: process.env.ENCRYPTION_IV_LENGTH,
 
+  // Database provider (PostgreSQL)
+  SYSTEM_DATABASE_PROVIDER_POSTGRES:
+    process.env.SYSTEM_DATABASE_PROVIDER_POSTGRES,
+  // Database provider (Redis)
+  SYSTEM_DATABASE_PROVIDER_REDIS: process.env.SYSTEM_DATABASE_PROVIDER_REDIS,
+
   // Database (PostgreSQL)
   DATABASE_URL: process.env.DATABASE_URL,
+  // Direct URL for Neon database (non-pooling)
+  DIRECT_URL: process.env.DIRECT_URL,
 
-  // Database (Redis - for future use)
+  // Database (Redis)
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: process.env.REDIS_PORT,
-  // REDIS_USERNAME: process.env.REDIS_USERNAME,
-  // REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_USERNAME: process.env.REDIS_USERNAME || '',
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
   REDIS_DB: process.env.REDIS_DB,
 });
 
