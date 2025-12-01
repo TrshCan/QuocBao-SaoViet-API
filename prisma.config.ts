@@ -4,6 +4,7 @@ import path from 'node:path';
 
 type Env = {
   DATABASE_URL: string;
+  DIRECT_URL: string;
 };
 
 export default {
@@ -19,6 +20,7 @@ export default {
     path: path.join('prisma', 'queries'),
   },
   datasource: {
-    url: env<Env>('DATABASE_URL'),
+    // If DIRECT_URL is set in the environment staging, use it, otherwise use DATABASE_URL in production
+    url: env<Env>('DIRECT_URL') ?? env<Env>('DATABASE_URL'),
   },
 } satisfies PrismaConfig;

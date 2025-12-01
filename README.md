@@ -6,6 +6,8 @@
 
 ## Project setup
 
+0. Checkout [.env.example](./.env.example)
+
 1. Run depencies
 
 ```bash
