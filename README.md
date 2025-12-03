@@ -44,6 +44,18 @@ yarn typedoc:generate:prisma
 yarn db:migrate
 ```
 
+6. Options (Insert seeds)
+
+```bash
+yarn db:seed
+```
+
+```bash
+# Infor account dedault
+username: admin
+password: Admin@123
+```
+
 ## Compile and run the project
 
 ```bash

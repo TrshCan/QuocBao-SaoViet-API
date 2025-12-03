@@ -17,7 +17,7 @@ import type { PaginatedResponse } from '@/types/pagination';
 
 const SALT_ROUNDS = 10;
 
-type UserWithoutPassword = Omit<User, 'password' | 'secretOtp'>;
+export type UserWithoutPassword = Omit<User, 'password' | 'secretOtp'>;
 
 @Injectable()
 export class UserService {

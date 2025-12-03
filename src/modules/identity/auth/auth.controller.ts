@@ -32,7 +32,7 @@ import { MailEvents } from '@/common/enums/mail-events';
 import type { ResponseController } from '@/types/response-controller';
 import type { AuthLoginDto, AuthForgotPasswordDto } from './dto';
 import type { LoginResponse, RefreshResponse } from './interfaces';
-import { type FoundCurrentUser, UserService } from '../user';
+import { UserService, type UserWithoutPassword } from '../user';
 import { type ForgotPasswordEmailPayload } from '@/modules/mail';
 
 @Controller('auth')
@@ -49,12 +49,12 @@ export class AuthController {
   @UseGuards(JwtAuthenticateGuard)
   async me(
     @Req() request: Request,
-  ): Promise<ResponseController<FoundCurrentUser>> {
+  ): Promise<ResponseController<UserWithoutPassword>> {
     if (!request.user) {
       throw new UnauthorizedException('Authentication required!');
     }
 
-    const user: FoundCurrentUser = await this.userService.getCurrentUser(
+    const user: UserWithoutPassword = await this.userService.getCurrentUser(
       request.user.id,
     );
 
