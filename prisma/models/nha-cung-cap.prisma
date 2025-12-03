@@ -11,4 +11,4 @@ model NhaCungCap {
   createdBy String?  @db.VarChar(255)
   updatedBy String?  @db.VarChar(255)
   isDelete  Boolean  @default(false)
-}
+} 
