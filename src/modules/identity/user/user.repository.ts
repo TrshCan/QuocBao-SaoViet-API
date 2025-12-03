@@ -16,6 +16,21 @@ type UserResult = Prisma.UserGetPayload<{
 export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
+  async findMany(query: Prisma.UserFindManyArgs) {
+    const { take: limit, skip: offset, where, orderBy, ...rest } = query;
+    return this.prisma.user.findMany({
+      take: limit,
+      skip: offset,
+      where,
+      orderBy,
+      ...rest,
+    });
+  }
+
+  async count(where: Prisma.UserWhereInput) {
+    return this.prisma.user.count({ where });
+  }
+
   async findOneByUsername<T extends UserQuery, I extends UserInclude>(
     username: string,
     options?: {
@@ -51,11 +66,23 @@ export class UserRepository {
       include?: I;
     },
   ): Promise<UserResult | null> {
-    const buildQuery = await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email },
       ...options,
     });
-    return buildQuery;
+  }
+
+  async createOne<T extends UserQuery, I extends UserInclude>(
+    data: Prisma.UserCreateInput,
+    options?: {
+      select?: T;
+      include?: I;
+    },
+  ): Promise<UserResult> {
+    return this.prisma.user.create({
+      data,
+      ...options,
+    });
   }
 
   async updateOneById<T extends UserQuery, I extends UserInclude>(
@@ -66,11 +93,24 @@ export class UserRepository {
       include?: I;
     },
   ): Promise<UserResult | null> {
-    const buildQuery = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data,
       ...options,
     });
-    return buildQuery;
+  }
+
+  async softDeleteById(id: string): Promise<UserResult> {
+    return this.prisma.user.update({
+      where: { id },
+      data: { isDelete: true },
+    });
+  }
+
+  async restoreById(id: string): Promise<UserResult> {
+    return this.prisma.user.update({
+      where: { id },
+      data: { isDelete: false },
+    });
   }
 }
