@@ -1,0 +1,15 @@
+model ChiTietNhapKho {
+  id        String    @id @default(uuid(7))
+  phieuId   String
+  sanPhamId String
+  soLuong   Decimal   @db.Decimal(18, 3)
+  donGia    Decimal?  @db.Decimal(18, 2)
+  soLo      String?   @db.VarChar(100)
+  hanSuDung DateTime?
+  soSerial  String?   @db.VarChar(100)
+
+  phieu   PhieuNhapKho @relation(fields: [phieuId], references: [id])
+  sanPham SanPham      @relation(fields: [sanPhamId], references: [id])
+
+  @@index([phieuId])
+}

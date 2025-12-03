@@ -1,0 +1,14 @@
+model NhaCungCap {
+  // Nhà cung cấp
+  id            String  @id @default(uuid(7))
+  tenNhaCungCap String
+  diaChi        String? @db.VarChar(255)
+  nguoiLienHe   String? @db.VarChar(100)
+  soDienThoai   String? @db.VarChar(20)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(255)
+  updatedBy String?  @db.VarChar(255)
+  isDelete  Boolean  @default(false)
+}

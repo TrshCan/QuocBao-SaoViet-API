@@ -1,0 +1,20 @@
+model PhieuChuyenKho {
+  // Phiếu chuyển kho (giữa kho hoặc giữa các vị trí)
+  id          String   @id @default(uuid(7))
+  soPhieu     String   @unique
+  khoXuatId   String
+  khoNhapId   String
+  ngayChuyen  DateTime @default(now())
+  trangThaiId String? // FK to TrangThaiChuyen
+  ghiChu      String?  @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(255)
+  updatedBy String?  @db.VarChar(255)
+  isDelete  Boolean  @default(false)
+
+  khoXuat Kho                @relation("KhoXuat", fields: [khoXuatId], references: [id])
+  khoNhap Kho                @relation("KhoNhap", fields: [khoNhapId], references: [id])
+  chiTiet ChiTietChuyenKho[]
+}

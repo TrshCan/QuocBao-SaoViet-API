@@ -21,6 +21,7 @@ export default {
   },
   datasource: {
     // If DIRECT_URL is set in the environment staging, use it, otherwise use DATABASE_URL in production
-    url: env<Env>('DIRECT_URL') ?? env<Env>('DATABASE_URL'),
+    // url: env<Env>('DIRECT_URL') ?? env<Env>('DATABASE_URL'),
+    url: env<Env>('DATABASE_URL'),
   },
 } satisfies PrismaConfig;

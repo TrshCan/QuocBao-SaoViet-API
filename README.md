@@ -6,7 +6,13 @@
 
 ## Project setup
 
-0. Checkout [.env.example](./.env.example)
+* Requirement:
+  * Nvm [nvm-sh](https://github.com/nvm-sh/nvm) for manage multiple active node.js versions
+  * Nodejs version > 22.0.0 (LTS)
+  * yarn (version classic)
+  * docker desktop
+
+0. Checkout [.env.example](./.env.example) to setup .env
 
 1. Run depencies
 
@@ -93,15 +99,15 @@ Copy the schema.dbml content and visualize it as an Entity-Relationship Diagram
 
 ## Resources
 
-- [Development Guide](documents/development_guide.md)
-- [Lifecycle events in NestJS](https://docs.nestjs.com/fundamentals/lifecycle-events)
-- [Query with Prisma](https://docs.nestjs.com/recipes/prisma#create-two-database-tables-with-prisma-migrate)
-- [Health check with Terminus](https://docs.nestjs.com/recipes/terminus#healthchecks-terminus)
-- [API Reference's NestJS](https://api-references-nestjs.netlify.app/api)
-- [Compodoc Reference in NestJS](https://docs.nestjs.com/recipes/documentation)
-- [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
-- [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
-- [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
-- [Provision preview databases with GitHub Actions](https://www.prisma.io/docs/guides/github-actions)
-- [Prisma openapi](https://github.com/nitzano/prisma-openapi)
-- [Reference's TypeDoc](https://typedoc.org/index.html)
+* [Development Guide](documents/development_guide.md)
+* [Lifecycle events in NestJS](https://docs.nestjs.com/fundamentals/lifecycle-events)
+* [Query with Prisma](https://docs.nestjs.com/recipes/prisma#create-two-database-tables-with-prisma-migrate)
+* [Health check with Terminus](https://docs.nestjs.com/recipes/terminus#healthchecks-terminus)
+* [API Reference's NestJS](https://api-references-nestjs.netlify.app/api)
+* [Compodoc Reference in NestJS](https://docs.nestjs.com/recipes/documentation)
+* [Generates realistic-looking fake data for your Prisma models that can be used in unit/integration tests, demos, and more](https://github.com/luisrudge/prisma-generator-fake-data)
+* [Transforms the Prisma schema into Database Markup Language (DBML)](https://notiz.dev/blog/prisma-dbml-generator)
+* [Multi file prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema)
+* [Provision preview databases with GitHub Actions](https://www.prisma.io/docs/guides/github-actions)
+* [Prisma openapi](https://github.com/nitzano/prisma-openapi)
+* [Reference's TypeDoc](https://typedoc.org/index.html)
