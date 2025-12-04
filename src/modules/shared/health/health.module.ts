@@ -4,7 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 
 import { HealthController } from './health.controller';
 import { IoredisModule } from '../ioredis';
-import { MailModule } from '@/modules/mail';
+import { MailModule } from '@/modules/v1/mail';
 
 @Module({
   imports: [TerminusModule, HttpModule, IoredisModule, MailModule],

@@ -1,4 +1,4 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Get, Inject, VERSION_NEUTRAL } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
   DiskHealthIndicator,
@@ -13,14 +13,14 @@ import {
 import { KEY_THROTTLER } from '@/common/constants';
 
 import { PrismaService } from '@/modules/shared/prisma';
-import { MailService } from '@/modules/mail';
+import { MailService } from '@/modules/v1/mail';
 import { IoredisHealthIndicator } from '../ioredis';
 import { REDIS_CLIENT } from '../ioredis/ioredis.constants';
 
 import type { RedisClient } from '../ioredis/ioredis.provider';
 import type { ResponseController } from '@/types/response-controller';
 
-@Controller('health')
+@Controller({ path: 'health', version: VERSION_NEUTRAL })
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
