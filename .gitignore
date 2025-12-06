@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# NestJS auto-generated metadata
+/src/metadata.ts
+
 # Logs
 logs
 *.log
