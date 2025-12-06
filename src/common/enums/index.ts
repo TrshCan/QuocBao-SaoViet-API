@@ -1,4 +1,5 @@
 export * from './mail-events';
+export * from './pagination';
 export * from './permission-action';
 export * from './permission-resource';
 export * from './permission-strategy';

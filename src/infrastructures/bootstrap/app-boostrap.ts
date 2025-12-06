@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
 import path from 'path';
+import * as fs from 'fs';
 
 import {
   applicationConfig,
@@ -99,6 +100,12 @@ export class AppBootstrap {
         swaggerConfig,
         swaggerDocumentOptions,
       );
+
+      fs.writeFileSync(
+        'documents/postman/SaoViet.postman_collection.json',
+        JSON.stringify(document),
+      ); // <-- Save document to json file
+
       const yamlDocument = loadOpenApiYaml();
 
       if (yamlDocument) {
