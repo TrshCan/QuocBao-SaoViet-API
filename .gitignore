@@ -71,5 +71,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /documents/ERD.dbml
 ERD.md
 
+# Postman
+/documents/postman/
+
 # Secret Data
 secret.txt
