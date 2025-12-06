@@ -1,3 +1,4 @@
+import { PaginationSortOrder } from '@/common/enums';
 import z from 'zod/v4';
 
 export const findAllSuppliersSchema = z.strictObject({
@@ -5,5 +6,8 @@ export const findAllSuppliersSchema = z.strictObject({
   limit: z.coerce.number().min(1).max(100).default(10),
   search: z.string().optional().default(''),
   sortBy: z.string().optional().default('createdAt'),
-  sortOrder: z.enum(PaginationSortOrder).optional().default('desc'),
+  sortOrder: z
+    .enum(PaginationSortOrder)
+    .optional()
+    .default(PaginationSortOrder.DESC),
 });
