@@ -10,24 +10,11 @@ import { MulterModule } from '@/infrastructures/storages';
 import { ThrottlerModule } from '@/infrastructures/throttler';
 import { ConfigModule } from '@/infrastructures/config';
 
+// VERSION_NEUTRAL Module
 import { PrismaModule, HealthModule, IoredisModule } from '@/modules/shared';
-import {
-  AuthModule,
-  RoleModule,
-  RoleClosureModule,
-  RolePermissionModule,
-  UserRoleModule,
-  PermissionModule,
-  KeyTokenModule,
-  UserModule,
-} from '@/modules/identity';
-import { MailModule } from '@/modules/mail';
-import { ReceiptsModule } from '@/modules/receipts';
-import { WarehousesModule } from '@/modules/warehouses';
-import { UnitsModule } from '@/modules/units';
-import { ProductsModule } from '@/modules/products';
-import { CustomersModule } from '@/modules/customers';
-import { SuppliersModule } from '@/modules/suppliers';
+
+// V1 Modules
+import { appModuleMetadataV1 } from './app-module-metadata.v1';
 
 @Module({
   imports: [
@@ -38,23 +25,8 @@ import { SuppliersModule } from '@/modules/suppliers';
     PrismaModule,
     IoredisModule,
     HealthModule,
-    MailModule,
-    // Identity Context
-    AuthModule,
-    KeyTokenModule,
-    RoleModule,
-    RoleClosureModule,
-    RolePermissionModule,
-    UserRoleModule,
-    PermissionModule,
-    UserModule,
-    // =================
-    ReceiptsModule,
-    WarehousesModule,
-    UnitsModule,
-    ProductsModule,
-    CustomersModule,
-    SuppliersModule,
+    // V1 Modules
+    ...(appModuleMetadataV1.imports || []),
   ],
   controllers: [AppController],
   providers: [

@@ -82,6 +82,7 @@
     "ioredis": "^5.8.2",
     "js-yaml": "^4.1.0",
     "multer": "^2.0.2",
+    "nestjs-zod": "^5.0.1",
     "nodemailer": "^7.0.10",
     "otplib": "^12.0.1",
     "pg": "^8.16.3",

@@ -8,11 +8,16 @@
   },
   "compilerOptions": {
     "deleteOutDir": true,
+    "plugins": ["@nestjs/swagger"],
     "assets": [
       {
         "include": "modules/mail/templates/**/*",
         "watchAssets": true,
         "outDir": "dist/modules/mail/templates"
+      },
+      {
+        "include": "served/**/*",
+        "watchAssets": true
       }
     ],
     "builder": {

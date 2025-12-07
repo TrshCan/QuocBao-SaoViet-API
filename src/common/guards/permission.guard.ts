@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { PermissionService } from '@/modules/identity/permission';
+import { PermissionService } from '@/modules/v1/identity/permission';
 import { PERMISSIONS_KEY } from '../decorators';
 import { PermissionObjectTypes } from '@/types/permission';
 

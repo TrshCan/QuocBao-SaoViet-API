@@ -25,11 +25,13 @@
       "@/*": [
         "./src/*"
       ],
-    }
+    },
+    "allowJs": true,
   },
   "exclude": [
     "node_modules",
     "dist",
+    "src/metadata.ts"
   ],
   "watchOptions": {
     "watchFile": "fixedPollingInterval"

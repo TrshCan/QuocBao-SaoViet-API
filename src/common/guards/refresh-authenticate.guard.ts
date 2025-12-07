@@ -9,7 +9,7 @@ import {
 
 import type { Request } from 'express';
 
-import { KeyTokenService } from '@/modules/identity/key-token';
+import { KeyTokenService } from '@/modules/v1/identity/key-token';
 import { CLIENT_ID, REFRESH_TOKEN, VALUE_TOKEN } from '../constants';
 import { requireHeader, setRefreshUser, validateUserId } from '@/utils';
 
