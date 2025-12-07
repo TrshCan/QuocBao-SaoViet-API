@@ -16,11 +16,11 @@ import { UserRepository } from '../user';
 
 import { getInfoData } from '@/utils';
 
-import type { AuthLoginDto } from './dto/auth-login.dto';
+import type { RequestAuthLoginDto } from './dto/auth-login.dto';
 import type { LoginResponse } from './interfaces/login';
 import type { EnvConfig } from '@/configs';
 import type { AccessTokenPayload, TempTokenPayload } from '@/types/jwt';
-import { AuthForgotPasswordDto } from './dto';
+import { RequestAuthForgotPasswordDto } from './dto';
 import { KEY_CACHE } from '@/common/constants';
 import { UserGetPayload } from '@/generated/prisma/models/User';
 import { KeyTokenGetPayload } from '@/generated/prisma/models/KeyToken';
@@ -39,7 +39,7 @@ export class AuthService {
   ) {}
 
   async login(
-    body: AuthLoginDto,
+    body: RequestAuthLoginDto,
     userAgent: string,
     ipAddress: string,
   ): Promise<LoginResponse> {
@@ -311,7 +311,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword({ username, email }: AuthForgotPasswordDto) {
+  async forgotPassword({ username, email }: RequestAuthForgotPasswordDto) {
     const user = await this.userRepository.findOneByUsername(username, {
       select: {
         id: true,

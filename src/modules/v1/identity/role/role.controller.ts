@@ -3,25 +3,22 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Query,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBody,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { ApiTags } from '@nestjs/swagger';
 
 import { Roles } from '@/common/decorators';
 import { Roles as RolesEnum } from '@/common/enums';
 import { RolesGuard } from '@/common/guards';
 import { ZodValidationPipe } from '@/common/pipes';
+import { KEY_THROTTLER } from '@/common/constants';
 
 import { RoleService, type RoleTreeNode } from './role.service';
 
@@ -47,6 +44,48 @@ import type {
 } from './dto';
 import type { Role } from '@/generated/prisma/client';
 
+import {
+  FindAllRolesApiOperation,
+  FindAllRolesApiQuery,
+  FindAllRolesApiResponse,
+} from './docs/find-all-roles.doc';
+import {
+  GetRoleTreeApiOperation,
+  GetRoleTreeApiResponse,
+} from './docs/get-role-tree.doc';
+import {
+  FindOneByIdApiOperation,
+  FindOneByIdApiParam,
+  FindOneByIdApiResponse,
+} from './docs/find-one-by-id.doc';
+import {
+  FindParentsByRoleIdApiOperation,
+  FindParentsByRoleIdApiParam,
+  FindParentsByRoleIdApiResponse,
+} from './docs/find-parents-by-role-id.doc';
+import {
+  FindChildrenByRoleIdApiOperation,
+  FindChildrenByRoleIdApiParam,
+  FindChildrenByRoleIdApiResponse,
+} from './docs/find-children-by-role-id.doc';
+import {
+  CreateRoleApiBody,
+  CreateRoleApiOperation,
+  CreateRoleApiResponse,
+} from './docs/create-role.doc';
+import {
+  AddParentToRoleApiOperation,
+  AddParentToRoleApiParam,
+  AddParentToRoleApiParam2,
+  AddParentToRoleApiResponse,
+} from './docs/add-parent-to-role.doc';
+import {
+  DeleteParentFromRoleApiOperation,
+  DeleteParentFromRoleApiParam,
+  DeleteParentFromRoleApiParam2,
+  DeleteParentFromRoleApiResponse,
+} from './docs/delete-parent-from-role.doc';
+
 @Controller({ path: 'role', version: '1' })
 @UseGuards(RolesGuard)
 @Roles(RolesEnum.ADMIN)
@@ -55,11 +94,16 @@ export class RoleController {
   constructor(private roleService: RoleService) {}
 
   @Get()
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<FindAllRolesDto, FindAllRolesDto>({
       query: findAllRolesSchema,
     }),
   )
+  @FindAllRolesApiOperation()
+  @FindAllRolesApiQuery()
+  @FindAllRolesApiResponse()
   async findAllRoles(
     @Query() query: FindAllRolesDto,
   ): Promise<ResponseController<unknown>> {
@@ -71,6 +115,10 @@ export class RoleController {
   }
 
   @Get('tree')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 20, ttl: 60000 } })
+  @GetRoleTreeApiOperation()
+  @GetRoleTreeApiResponse()
   async getRoleTree(): Promise<
     ResponseController<(RoleTreeNode | undefined)[]>
   > {
@@ -82,11 +130,16 @@ export class RoleController {
   }
 
   @Get(':roleId')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<FindByIdDto, FindByIdDto>({
       param: findByIdSchema.shape.roleId,
     }),
   )
+  @FindOneByIdApiOperation()
+  @FindOneByIdApiParam()
+  @FindOneByIdApiResponse()
   async findOneById(
     @Param('roleId') roleId: string,
   ): Promise<ResponseController<unknown>> {
@@ -98,12 +151,16 @@ export class RoleController {
   }
 
   @Get(':roleId/parents')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<FindParentsRolesDto, FindParentsRolesDto>({
       param: findParentsRolesSchema,
     }),
   )
-  // @UseGuards(JwtAuthenticateGuard)
+  @FindParentsByRoleIdApiOperation()
+  @FindParentsByRoleIdApiParam()
+  @FindParentsByRoleIdApiResponse()
   async findParentsByRoleId(
     @Param() params: FindParentsRolesDto,
   ): Promise<ResponseController<unknown>> {
@@ -115,12 +172,16 @@ export class RoleController {
   }
 
   @Get(':roleId/children')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ [KEY_THROTTLER.MEDIUM]: { limit: 30, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<FindChildrenRolesDto, FindChildrenRolesDto>({
       param: findChildrenRolesSchema,
     }),
   )
-  // @UseGuards(JwtAuthenticateGuard)
+  @FindChildrenByRoleIdApiOperation()
+  @FindChildrenByRoleIdApiParam()
+  @FindChildrenByRoleIdApiResponse()
   async findChildrenByRoleId(
     @Param() params: FindChildrenRolesDto,
   ): Promise<ResponseController<unknown>> {
@@ -132,12 +193,16 @@ export class RoleController {
   }
 
   @Post('create')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<RoleCreationDto, RoleCreationDto>({
       body: roleCreationSchema,
     }),
   )
-  // @UseGuards(JwtAuthenticateGuard)
+  @CreateRoleApiOperation()
+  @CreateRoleApiBody()
+  @CreateRoleApiResponse()
   async createRole(
     @Body() body: RoleCreationDto,
   ): Promise<ResponseController<{ role: Role; addParent?: boolean }>> {
@@ -149,12 +214,17 @@ export class RoleController {
   }
 
   @Post(':roleId/add-parent/:parentRoleId')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<AddParentToRoleDto, AddParentToRoleDto>({
       param: addParentToRoleSchema,
     }),
   )
-  // @UseGuards(JwtAuthenticateGuard)
+  @AddParentToRoleApiOperation()
+  @AddParentToRoleApiParam()
+  @AddParentToRoleApiParam2()
+  @AddParentToRoleApiResponse()
   async addParentToRole(
     @Param() params: AddParentToRoleDto,
   ): Promise<ResponseController<boolean>> {
@@ -169,12 +239,17 @@ export class RoleController {
   }
 
   @Delete(':roleId/delete-parent/:parentRoleId')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UsePipes(
     new ZodValidationPipe<DeleteParentFromRoleDto, DeleteParentFromRoleDto>({
       param: deleteParentFromRoleSchema,
     }),
   )
-  // @UseGuards(JwtAuthenticateGuard)
+  @DeleteParentFromRoleApiOperation()
+  @DeleteParentFromRoleApiParam()
+  @DeleteParentFromRoleApiParam2()
+  @DeleteParentFromRoleApiResponse()
   async deleteParentFromRole(
     @Param() params: DeleteParentFromRoleDto,
   ): Promise<ResponseController<boolean>> {

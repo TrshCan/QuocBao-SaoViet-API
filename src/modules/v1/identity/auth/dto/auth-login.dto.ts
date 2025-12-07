@@ -1,11 +1,14 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 
-import { authLoginSchema } from '../validations/auth-login-schema';
-import { responseControllerSchema } from '@/common/validations/response-controller';
+import {
+  requestAuthLoginSchema,
+  responseAuthLoginSchema,
+} from '../validations/auth-login-schema';
 
-export type AuthLoginDto = z.infer<typeof authLoginSchema>;
+export type RequestAuthLoginDto = z.infer<typeof requestAuthLoginSchema>;
 
-export class ClassResponseAuthLoginDto extends createZodDto(
-  responseControllerSchema(authLoginSchema),
+export class ClassRequestAuthLoginDto extends createZodDto(
+  requestAuthLoginSchema,
 ) {}
+export class ClassAuthLoginDto extends createZodDto(responseAuthLoginSchema) {}

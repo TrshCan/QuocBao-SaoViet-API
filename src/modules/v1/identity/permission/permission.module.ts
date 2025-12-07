@@ -11,6 +11,8 @@ import { PermissionService } from './permission.service';
 import { UserRoleModule } from '../user-role';
 import { RoleClosureModule } from '../role-closure';
 import { RolePermissionModule } from '../role-permission';
+import { KeyTokenModule } from '../key-token';
+import { IoredisModule } from '@/modules/shared';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { RolePermissionModule } from '../role-permission';
     UserRoleModule,
     RoleClosureModule,
     RolePermissionModule,
+    KeyTokenModule,
+    IoredisModule,
   ],
   providers: [
     PermissionService,

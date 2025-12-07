@@ -1,10 +1,12 @@
 import { z } from 'zod/v4';
-
-import { authForgotPasswordSchema } from '../validations';
 import { createZodDto } from 'nestjs-zod';
 
-export type AuthForgotPasswordDto = z.infer<typeof authForgotPasswordSchema>;
+import { authForgotPasswordSchema } from '../validations';
 
-export class ClassAuthForgotPasswordDto extends createZodDto(
+export type RequestAuthForgotPasswordDto = z.infer<
+  typeof authForgotPasswordSchema
+>;
+
+export class ClassRequestAuthForgotPasswordDto extends createZodDto(
   authForgotPasswordSchema,
 ) {}
