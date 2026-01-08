@@ -1,0 +1,19 @@
+model DanhMuc {
+  id         String   @id @default(uuid(7))
+  maDanhMuc  String   @unique // Category code
+  tenDanhMuc String   // Category name
+  moTa       String?  @db.VarChar(500) // Description
+  thuTu      Int      @default(0) // Display order
+
+  // Parent category for hierarchical structure (optional)
+  parentId String?
+  parent   DanhMuc?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children DanhMuc[] @relation("CategoryHierarchy")
+
+  // Standard audit fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?  @db.VarChar(255)
+  updatedBy String?  @db.VarChar(255)
+  isDelete  Boolean  @default(false)
+}

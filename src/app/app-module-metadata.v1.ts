@@ -18,6 +18,7 @@ import { UnitsModule } from '@/modules/v1/units';
 import { ProductsModule } from '@/modules/v1/products';
 import { CustomersModule } from '@/modules/v1/customers';
 import { SuppliersModule } from '@/modules/v1/suppliers';
+import { CategoriesModule } from '@/modules/v1/categories';
 
 export const appModuleMetadataV1: ModuleMetadata = {
   imports: [
@@ -38,6 +39,7 @@ export const appModuleMetadataV1: ModuleMetadata = {
     ProductsModule,
     CustomersModule,
     SuppliersModule,
+    CategoriesModule,
     // =================
   ],
 };
