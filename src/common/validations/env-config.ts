@@ -13,12 +13,15 @@ export const envConfigSchema = z.object({
   CLIENT_URL: z.string(),
   DEMO_USERNAME: z.string(),
   DEMO_PASSWORD: z.string(),
-  // SMTP
-  SMTP_HOST: z.string(),
-  SMTP_PORT: z.coerce.number().int().positive().default(587),
-  SMTP_USER: z.string(),
-  SMTP_PASS: z.string(),
-  SMTP_FROM: z.string(),
+  // SMTP (optional - leave empty if not needed)
+  SMTP_HOST: z.string().optional().default(''),
+  SMTP_PORT: z.preprocess(
+    (val) => (val === '' || val === undefined ? undefined : val),
+    z.coerce.number().int().positive().optional().default(587),
+  ),
+  SMTP_USER: z.string().optional().default(''),
+  SMTP_PASS: z.string().optional().default(''),
+  SMTP_FROM: z.string().optional().default(''),
   // Port
   PORT: z.coerce.number().int().positive().default(3000),
   // CORS
@@ -57,5 +60,5 @@ export const envConfigSchema = z.object({
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
   REDIS_USERNAME: z.string().optional(),
   REDIS_PASSWORD: z.string().optional(),
-  REDIS_DB: z.coerce.number().int().positive().default(0),
+  REDIS_DB: z.coerce.number().int().nonnegative().default(0),
 });
