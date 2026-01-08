@@ -14,6 +14,7 @@ import { seedChucNang } from './seeders/chuc-nang.seed';
 import { seedPhanQuyen } from './seeders/phan-quyen.seed';
 import { seedTrangThai } from './seeders/trang-thai.seed';
 import { seedPhieuNhapKho } from './seeders/phieu-nhap-kho.seed';
+import { seedDanhMuc } from './seeders/danh-muc.seed';
 
 import { seedRole } from './seeders/identity/role.seed';
 import { seedPermission } from './seeders/identity/permission.seed';
@@ -38,6 +39,7 @@ async function main() {
     await seedViTriKho(prisma);
     await seedNhaCungCap(prisma);
     await seedKhachHang(prisma);
+    await seedDanhMuc(prisma);
     await seedDonViChuyen(prisma);
     await seedChucNang(prisma);
     await seedRole(prisma);
@@ -83,6 +85,7 @@ async function cleanDatabase() {
   await prisma.donViTinh.deleteMany();
   await prisma.donViChuyen.deleteMany();
   await prisma.khachHang.deleteMany();
+  await prisma.danhMuc.deleteMany();
   await prisma.nhaCungCap.deleteMany();
   await prisma.trangThaiXuat.deleteMany();
   await prisma.trangThaiChuyen.deleteMany();
