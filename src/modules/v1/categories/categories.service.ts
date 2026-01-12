@@ -4,6 +4,7 @@ import {
     Logger,
     NotFoundException,
     ConflictException,
+    BadRequestException,
 } from '@nestjs/common';
 
 import { CategoriesRepository } from './categories.repository';
@@ -135,8 +136,12 @@ export class CategoriesService {
         try {
             const existingCategory =
                 await this.categoriesRepository.findOneById(categoryId);
-            if (!existingCategory || existingCategory.isDelete) {
+
+            if (!existingCategory) {
                 throw new NotFoundException('Category not found');
+            }
+            if (existingCategory.isDelete) {
+                throw new BadRequestException('Category has been deleted');
             }
 
             // Check if new code conflicts with existing
@@ -169,7 +174,11 @@ export class CategoriesService {
 
             return category as DanhMuc;
         } catch (error) {
-            if (error instanceof NotFoundException || error instanceof ConflictException) throw error;
+            if (
+                error instanceof NotFoundException ||
+                error instanceof ConflictException ||
+                error instanceof BadRequestException
+            ) throw error;
             this.logger.error('Failed to update category:', toErrorMessage(error));
             throw new InternalServerErrorException('Failed to update category');
         }
@@ -179,15 +188,19 @@ export class CategoriesService {
         try {
             const existingCategory =
                 await this.categoriesRepository.findOneById(categoryId);
-            if (!existingCategory || existingCategory.isDelete) {
+
+            if (!existingCategory) {
                 throw new NotFoundException('Category not found');
+            }
+            if (existingCategory.isDelete) {
+                throw new BadRequestException('Category has been deleted');
             }
 
             await this.categoriesRepository.softDeleteById(categoryId);
 
             return { success: true };
         } catch (error) {
-            if (error instanceof NotFoundException) throw error;
+            if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
             this.logger.error('Failed to delete category:', toErrorMessage(error));
             throw new InternalServerErrorException('Failed to delete category');
         }
